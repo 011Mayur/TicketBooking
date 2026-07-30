@@ -22,6 +22,192 @@ namespace TicketBooking.Repository.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("TicketBooking.Repository.Entity.Coupon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("discount_percentage");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("expiry_date");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_coupons");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_coupons_code");
+
+                    b.ToTable("coupons", (string)null);
+                });
+
+            modelBuilder.Entity("TicketBooking.Repository.Entity.CouponUsage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CouponId")
+                        .HasColumnType("int")
+                        .HasColumnName("coupon_id");
+
+                    b.Property<DateTime>("UsedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("used_at");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_coupon_usages");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_coupon_usages_user_id");
+
+                    b.HasIndex("CouponId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_coupon_usages_coupon_id_user_id");
+
+                    b.ToTable("coupon_usages", (string)null);
+                });
+
+            modelBuilder.Entity("TicketBooking.Repository.Entity.Event", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ArtistName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("artist_name");
+
+                    b.Property<int>("AvailableSeats")
+                        .HasColumnType("int")
+                        .HasColumnName("available_seats");
+
+                    b.Property<int?>("BulkTicketForDiscount")
+                        .HasColumnType("int")
+                        .HasColumnName("bulk_ticket_for_discount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<decimal?>("DiscountPercentage")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("discount_percentage");
+
+                    b.Property<DateTime>("EventDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("event_date");
+
+                    b.Property<TimeSpan>("EventTime")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("event_time");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("PosterImageUrl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("poster_image_url");
+
+                    b.Property<decimal>("TicketPrice")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("ticket_price");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("title");
+
+                    b.Property<int>("TotalSeats")
+                        .HasColumnType("int")
+                        .HasColumnName("total_seats");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("Venue")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("venue");
+
+                    b.HasKey("Id")
+                        .HasName("pk_events");
+
+                    b.ToTable("events", (string)null);
+                });
+
+            modelBuilder.Entity("TicketBooking.Repository.Entity.EventCouponCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CouponId")
+                        .HasColumnType("int")
+                        .HasColumnName("coupon_id");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("int")
+                        .HasColumnName("event_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_event_coupon_codes");
+
+                    b.HasIndex("EventId")
+                        .HasDatabaseName("ix_event_coupon_codes_event_id");
+
+                    b.HasIndex("CouponId", "EventId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_event_coupon_codes_coupon_id_event_id");
+
+                    b.ToTable("event_coupon_codes", (string)null);
+                });
+
             modelBuilder.Entity("TicketBooking.Repository.Entity.PassWordResetToken", b =>
                 {
                     b.Property<int>("Id")
@@ -65,6 +251,45 @@ namespace TicketBooking.Repository.Migrations
                         .HasDatabaseName("ix_pass_word_reset_tokens_user_id");
 
                     b.ToTable("pass_word_reset_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("TicketBooking.Repository.Entity.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("token");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_refresh_tokens");
+
+                    b.HasIndex("Token")
+                        .HasDatabaseName("ix_refresh_tokens_token");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_refresh_tokens_user_id");
+
+                    b.ToTable("refresh_tokens", (string)null);
                 });
 
             modelBuilder.Entity("TicketBooking.Repository.Entity.User", b =>
@@ -143,6 +368,42 @@ namespace TicketBooking.Repository.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("TicketBooking.Repository.Entity.CouponUsage", b =>
+                {
+                    b.HasOne("TicketBooking.Repository.Entity.Coupon", "Coupon")
+                        .WithMany()
+                        .HasForeignKey("CouponId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_coupon_usages_coupons_coupon_id");
+
+                    b.HasOne("TicketBooking.Repository.Entity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_coupon_usages_users_user_id");
+
+                    b.Navigation("Coupon");
+                });
+
+            modelBuilder.Entity("TicketBooking.Repository.Entity.EventCouponCode", b =>
+                {
+                    b.HasOne("TicketBooking.Repository.Entity.Coupon", null)
+                        .WithMany()
+                        .HasForeignKey("CouponId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_event_coupon_codes_coupons_coupon_id");
+
+                    b.HasOne("TicketBooking.Repository.Entity.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_event_coupon_codes_events_event_id");
+                });
+
             modelBuilder.Entity("TicketBooking.Repository.Entity.PassWordResetToken", b =>
                 {
                     b.HasOne("TicketBooking.Repository.Entity.User", null)
@@ -151,6 +412,16 @@ namespace TicketBooking.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_pass_word_reset_tokens_users_user_id");
+                });
+
+            modelBuilder.Entity("TicketBooking.Repository.Entity.RefreshToken", b =>
+                {
+                    b.HasOne("TicketBooking.Repository.Entity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_refresh_tokens_users_user_id");
                 });
 #pragma warning restore 612, 618
         }

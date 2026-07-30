@@ -23,8 +23,8 @@ namespace TicketBooking.Repository.Repository.Implementation
                     parameters
                 )
                 .AsAsyncEnumerable()
-                .FirstAsync();
-        }   
+                .FirstOrDefaultAsync();
+        }
 
         public async Task<int> AddUserAsync(UserRegisterDto user)
         {
@@ -35,7 +35,7 @@ namespace TicketBooking.Repository.Repository.Implementation
             await using (MySqlConnection connection = new(connectionString))
             {
                 await connection.OpenAsync();
-       
+
                 await using (MySqlCommand command = new("add_user", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
@@ -137,6 +137,51 @@ namespace TicketBooking.Repository.Repository.Implementation
                 new("@p_password_hash", passwordHash),
             ];
             await ExecuteStoredProcedure("update_password", parameters);
+        }
+
+        public async Task<RefreshTokenDto?> GetRefreshTokenAsync(string token)
+        {
+            MySqlParameter parameter = new("@p_token", token);
+
+            return await _db
+                .Database.SqlQueryRaw<RefreshTokenDto>(
+                    "CALL get_refresh_token(@p_token)",
+                    parameter
+                )
+                .AsAsyncEnumerable()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task CreateRefreshTokenAsync(int userId, string token, DateTime expiresAt)
+        {
+            MySqlParameter[] parameters =
+            [
+                new("@p_user_id", userId),
+                new("@p_token", token),
+                new("@p_expires_at", expiresAt),
+                new("@p_created_at", DateTime.UtcNow),
+            ];
+
+            await ExecuteStoredProcedure("create_refresh_token", parameters);
+        }
+
+        public async Task DeleteRefreshTokenAsync(string token)
+        {
+            MySqlParameter[] parameter = [new("@p_token", token)];
+            await ExecuteStoredProcedure("delete_refresh_token", parameter);
+        }
+
+        public async Task<UserLoginResponseDto?> GetUserByIdAsync(int userId)
+        {
+            MySqlParameter parameter = new("@p_user_id", userId);
+
+            return await _db
+                .Database.SqlQueryRaw<UserLoginResponseDto>(
+                    "CALL get_user_by_id(@p_user_id)",
+                    parameter
+                )
+                .AsAsyncEnumerable()
+                .FirstOrDefaultAsync();
         }
 
         private async Task ExecuteStoredProcedure(

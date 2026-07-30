@@ -1,5 +1,10 @@
 import { z } from "zod";
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/;
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const minimumBirthDate = new Date(today);
+minimumBirthDate.setFullYear(minimumBirthDate.getFullYear() - 16);
 export const registerSchema = z
   .object({
     firstName: z.string().min(1, "First name is required"),
@@ -9,7 +14,19 @@ export const registerSchema = z
       .string()
       .min(1, "Mobile number is required")
       .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
-    dateOfBirth: z.string().min(1, "Date of birth is required"),
+    dateOfBirth: z
+      .string()
+      .min(1, "Date of birth is required")
+      .refine(
+        (value) => {
+          const selectedDate = new Date(value);
+          selectedDate.setHours(0, 0, 0, 0);
+          return selectedDate < minimumBirthDate;
+        },
+        {
+          message: "You must be at least 16 years old.",
+        },
+      ),
     gender: z.enum(["Male", "Female"], {
       message: "Please select a valid gender.",
     }),

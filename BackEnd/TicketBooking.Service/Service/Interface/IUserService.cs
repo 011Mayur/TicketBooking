@@ -10,5 +10,10 @@ namespace TicketBooking.Service.Service.Interface
 
         Task RequestPasswordResetAsync(string email);
         Task<bool> ResetPasswordAsync(string rawToken, string newPassword);
+
+        Task<string> CreateRefreshTokenAsync(int userId);
+        Task<RefreshTokenDto?> ValidateRefreshTokenAsync(string token);
+        Task DeleteRefreshTokenAsync(string token);
+        Task<UserLoginResponseDto?> GetUserByIdAsync(int userId);
     }
 }

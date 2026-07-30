@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
+using TicketBooking.Repository.Common;
 using TicketBooking.Service.Service.Interface;
 
 namespace TicketBooking.Service.Service.Implementation
@@ -11,32 +12,32 @@ namespace TicketBooking.Service.Service.Implementation
 
         public async Task SendAsync(string toEmail, string subject, string body)
         {
-            IConfiguration smtpSetting = _configuration.GetSection("smtpSettings");
-            string Host =
-                smtpSetting["Host"]
-                ?? throw new InvalidOperationException("Host Is Not Configured");
-            string? User =
-                smtpSetting["User"]
-                ?? throw new InvalidOperationException("User Is Not Configured");
-            string? Password =
-                smtpSetting["Password"]
-                ?? throw new InvalidOperationException("Password Is Not Configured");
-            int Port = int.Parse(
-                smtpSetting["Port"] ?? throw new InvalidOperationException("Port Is Not Configured")
-            );
-            string from =
-                smtpSetting["From"]
-                ?? throw new InvalidOperationException("From Is Not Configured");
+            IConfigurationSection smtpSetting = _configuration.GetSection("smtpSettings");
+            string host = GetRequiredConfig(smtpSetting, "Host");
+            string? user = GetRequiredConfig(smtpSetting, "User");
+            string? password = GetRequiredConfig(smtpSetting, "Password");
+            int port = int.Parse(GetRequiredConfig(smtpSetting, "Port"));
+            string from = GetRequiredConfig(smtpSetting, "from");
 
-            using SmtpClient smtpClient = new(Host, Port)
+            using SmtpClient smtpClient = new(host, port)
             {
-                Credentials = new NetworkCredential(User, Password),
+                Credentials = new NetworkCredential(user, password),
                 EnableSsl = true,
             };
 
             using MailMessage message = new(from: from, to: toEmail, subject: subject, body: body);
 
             await smtpClient.SendMailAsync(message);
+        }
+
+        private static string GetRequiredConfig(IConfigurationSection section, string key)
+        {
+            string? value = section[key];
+
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException(ExceptionMessage.KeyNotConfigured(key));
+
+            return value;
         }
     }
 }

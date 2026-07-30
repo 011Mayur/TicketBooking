@@ -18,5 +18,11 @@ namespace TicketBooking.Repository.Repository.Interface
         );
         Task MarkTokenUsedAsync(string tokenHash);
         Task UpdatePasswordAsync(int userId, string passwordHash);
+
+        Task<RefreshTokenDto?> GetRefreshTokenAsync(string token);
+        Task CreateRefreshTokenAsync(int userId, string token, DateTime expiresAt);
+        Task DeleteRefreshTokenAsync(string token);
+
+        Task<UserLoginResponseDto?> GetUserByIdAsync(int userId);
     }
 }

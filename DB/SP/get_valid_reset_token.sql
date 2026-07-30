@@ -1,6 +1,4 @@
-DROP PROCEDURE IF EXISTS get_valid_reset_token;
 DELIMITER //
-
 CREATE PROCEDURE get_valid_reset_token(IN p_token_hash VARCHAR(64))
 BEGIN
 SELECT user_id, expires_at, is_used
@@ -10,3 +8,5 @@ LIMIT 1;
 END //
 
 DELIMITER ;
+
+drop PROCEDURE get_valid_reset_token

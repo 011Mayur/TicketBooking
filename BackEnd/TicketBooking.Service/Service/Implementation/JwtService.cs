@@ -1,8 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Model.DTO;
 using TicketBooking.Service.Service.Interface;
 
@@ -14,15 +16,11 @@ namespace TicketBooking.Service.Service.Implementation
 
         public string GenerateToken(UserLoginResponseDto user)
         {
-            var jwt = _config.GetSection("Jwt");
-            string key =
-                jwt["Key"]
-                ?? throw new InvalidOperationException("Jwt:Key missing in configuration.");
-            string issuer =
-                jwt["Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer missing.");
-            string audience =
-                jwt["Audience"] ?? throw new InvalidOperationException("Jwt:Audience missing.");
-            int expiryMinutes = int.TryParse(jwt["ExpiryMinutes"], out int m) ? m : 60;
+            IConfigurationSection jwt = _config.GetSection("Jwt");
+            string key = GetRequiredConfig<string>(jwt, "Key");
+            string issuer = GetRequiredConfig<string>(jwt, "Issuer");
+            string audience = GetRequiredConfig<string>(jwt, "Audience");
+            int expiryMinutes = GetRequiredConfig<int>(jwt, "AccessTokenExpiryMinutes");
 
             List<Claim> claims =
             [
@@ -44,6 +42,37 @@ namespace TicketBooking.Service.Service.Implementation
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            byte[] randomBytes = new byte[64];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        public DateTime GetTokenExpiryTime()
+        {
+            IConfigurationSection jwt = _config.GetSection("Jwt");
+            int refreshTokenExpiryDays = GetRequiredConfig<int>(jwt, "RefreshTokenExpiryDays");
+
+            return DateTime.UtcNow.AddDays(refreshTokenExpiryDays);
+        }
+
+        private static T GetRequiredConfig<T>(IConfigurationSection section, string key)
+        {
+            T? value =
+                section.GetValue<T>(key)
+                ?? throw new ArgumentException(ExceptionMessage.KeyNotConfigured(key));
+            if (typeof(T) == typeof(string) && string.IsNullOrWhiteSpace(value as string))
+            {
+                throw new ArgumentException(ExceptionMessage.KeyNotConfigured(key));
+            }
+
+            return value;
         }
     }
 }

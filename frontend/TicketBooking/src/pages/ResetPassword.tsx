@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TextField, Button, Paper, Typography } from "@mui/material";
+import { TextField, Button, Paper, Typography, Box } from "@mui/material";
 import { toast } from "react-toastify";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -42,45 +42,65 @@ const ResetPassword = () => {
       toast.success(res.data.message);
       navigate(APP_ROUTES.LOGIN);
     } catch {
-      toast.error(MESSAGES.LINK_EXPIRED);
+      toast.error(MESSAGES.AUTH.LINK_EXPIRED);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <Paper elevation={3} className="w-full max-w-md p-8">
-        <Typography variant="h5" className="mb-6 text-center font-semibold">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "background.default",
+        px: 2,
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{ width: "100%", maxWidth: 400, p: { xs: 3, sm: 4 } }}
+      >
+        <Typography
+          variant="h5"
+          sx={{ mb: 3, textAlign: "center", fontWeight: 600 }}
+        >
           Reset Password
         </Typography>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <TextField
-            label="New Password"
-            type="password"
-            fullWidth
-            {...register("newPassword")}
-            error={!!errors.newPassword}
-            helperText={errors.newPassword?.message}
-          />
-          <TextField
-            label="Confirm Password"
-            type="password"
-            fullWidth
-            {...register("confirmPassword")}
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword?.message}
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting}
-            fullWidth
-          >
-            {isSubmitting ? "Resetting..." : "Reset Password"}
-          </Button>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <TextField
+              label="New Password"
+              type="password"
+              fullWidth
+              size="small"
+              {...register("newPassword")}
+              error={!!errors.newPassword}
+              helperText={errors.newPassword?.message}
+            />
+            <TextField
+              label="Confirm Password"
+              type="password"
+              size="small"
+              fullWidth
+              {...register("confirmPassword")}
+              error={!!errors.confirmPassword}
+              helperText={errors.confirmPassword?.message}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              fullWidth
+              sx={{ mt: 1, minHeight: 44 }}
+            >
+              {isSubmitting ? "Resetting..." : "Reset Password"}
+            </Button>
+          </Box>
         </form>
       </Paper>
-    </div>
+    </Box>
   );
 };
 

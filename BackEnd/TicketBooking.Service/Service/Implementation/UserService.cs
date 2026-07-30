@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
+using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Model.DTO;
 using TicketBooking.Repository.Repository.Interface;
 using TicketBooking.Service.Service.Interface;
@@ -9,16 +10,20 @@ namespace TicketBooking.Service.Service.Implementation
     public class UserService(
         IUserRepository userRepo,
         IEmailService emailService,
-        IConfiguration configuration
+        IConfiguration configuration,
+        IJwtService jwtService
     ) : IUserService
     {
         private readonly IUserRepository _userRepo = userRepo;
         private readonly IEmailService _emailService = emailService;
 
         private readonly IConfiguration _configuration = configuration;
+        private readonly IJwtService _jwtService = jwtService;
 
         public async Task<int> AddUserAsync(UserRegisterDto user)
         {
+            if (!IsValidAge(user.DateOfBirth))
+                throw new BusinessRuleException(ExceptionMessage.MinimumAge);
             user.PasswordHash = PasswordHash(user.PasswordHash);
             int userId = await _userRepo.AddUserAsync(user);
 
@@ -56,7 +61,7 @@ namespace TicketBooking.Service.Service.Implementation
 
             await _userRepo.CreateResetTokenAsync(user.Id, tokenHash, expiresAt);
 
-            string link = $"{frontendBaseUrl}/reset-password?token={rawToken}";
+            string link = $"{frontendBaseUrl}/ResetPassword?token={rawToken}";
             string body =
                 $"Click the link below to reset your password. This link expires in 30 minutes.\n\n{link}\n\nIf you didn't request this, ignore this email.";
 
@@ -66,8 +71,9 @@ namespace TicketBooking.Service.Service.Implementation
         public async Task<bool> ResetPasswordAsync(string rawToken, string newPassword)
         {
             string tokenHash = Hash(rawToken);
-            (int UserId, DateTime ExpiresAt, bool Used)? record = await _userRepo.GetValidResetTokenAsync(tokenHash);
-DateTime now = DateTime.UtcNow;
+            (int UserId, DateTime ExpiresAt, bool Used)? record =
+                await _userRepo.GetValidResetTokenAsync(tokenHash);
+            DateTime now = DateTime.UtcNow;
             if (record is null || record.Value.Used || record.Value.ExpiresAt < now)
                 return false;
 
@@ -76,6 +82,42 @@ DateTime now = DateTime.UtcNow;
             await _userRepo.MarkTokenUsedAsync(tokenHash);
 
             return true;
+        }
+
+        public async Task<string> CreateRefreshTokenAsync(int userId)
+        {
+            string refreshToken = _jwtService.GenerateRefreshToken();
+            DateTime expiresAt = _jwtService.GetTokenExpiryTime();
+
+            await _userRepo.CreateRefreshTokenAsync(userId, refreshToken, expiresAt);
+
+            return refreshToken;
+        }
+
+        public async Task<RefreshTokenDto?> ValidateRefreshTokenAsync(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            RefreshTokenDto? dbToken = await _userRepo.GetRefreshTokenAsync(token);
+
+            if (dbToken is null || dbToken.ExpiresAt < DateTime.UtcNow)
+                return null;
+
+            return dbToken;
+        }
+
+        public async Task DeleteRefreshTokenAsync(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return;
+
+            await _userRepo.DeleteRefreshTokenAsync(token);
+        }
+
+        public async Task<UserLoginResponseDto?> GetUserByIdAsync(int userId)
+        {
+            return await _userRepo.GetUserByIdAsync(userId);
         }
 
         private static string PasswordHash(string PlainPassWord)
@@ -97,6 +139,20 @@ DateTime now = DateTime.UtcNow;
         {
             byte[] bytes = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(input));
             return Convert.ToHexString(bytes).ToLowerInvariant();
+        }
+
+        private static bool IsValidAge(DateTime dateOfBirth)
+        {
+            DateTime today = DateTime.Today;
+
+            int age = today.Year - dateOfBirth.Year;
+
+            if (dateOfBirth.Date > today.AddYears(-age))
+            {
+                age--;
+            }
+
+            return age > 16;
         }
     }
 }
