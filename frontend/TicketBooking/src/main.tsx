@@ -3,17 +3,19 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { ThemeProvider } from "@emotion/react";
-import { createTheme, CssBaseline } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ToastContainer } from "react-toastify";
-
-const theme = createTheme();
+import { theme } from "./Theme/Theme.ts";
+import { AuthProvider } from "./Context/AuthProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  <StrictMode >
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
-      <ToastContainer position="top-right" autoClose={3000} />
+      <AuthProvider>
+        <App />
+        <ToastContainer position="top-right" autoClose={3000} />
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>,
 );

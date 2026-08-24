@@ -6,11 +6,11 @@ namespace TicketBooking.Repository.Entity
     public class User : BaseEntity
     {
         [Required]
-        [MaxLength(Constant.NameMaxLength)]
+        [MaxLength(ResonanceConstant.NameMaxLength)]
         public required string FirstName { get; set; }
 
         [Required]
-        [MaxLength(Constant.NameMaxLength)]
+        [MaxLength(ResonanceConstant.NameMaxLength)]
         public required string LastName { get; set; }
 
         [Required]
@@ -27,7 +27,7 @@ namespace TicketBooking.Repository.Entity
 
         [Required]
         [MaxLength(
-            Constant.MobileNumberLength,
+            ResonanceConstant.MobileNumberLength,
             ErrorMessage = ValidationMessage.MobileMaxLengthValidationMessage
         )]
         [RegularExpression(
@@ -38,7 +38,7 @@ namespace TicketBooking.Repository.Entity
 
         [Required]
         [MaxLength(
-            Constant.EmailMaxLength,
+            ResonanceConstant.EmailMaxLength,
             ErrorMessage = ValidationMessage.EmailMaxLengthValidationMessage
         )]
         [RegularExpression(

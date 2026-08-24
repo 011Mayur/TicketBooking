@@ -7,6 +7,8 @@ namespace TicketBooking.Repository.Common
 {
     public class ValidationMessage
     {
+
+        public const string PositiveId="Id can't be zero";
         public const string RequiredEmail = "Email Is required";
 
         public const string ReuiredPassword = "Password is required";
@@ -30,12 +32,26 @@ namespace TicketBooking.Repository.Common
 
         public const string PasswordRequired = "Password is required";
 
-   
-
         public const string TokenRequired = "Token is required";
         public const string PasswordMinLength = "Password  Must Containes atleast 8 characters";
 
-        public const string PasswordMaxLength="Password Must Not Exceed 15 characters";
-             public const string PasswordValidation = "Password Must contains atleast one Capital Latter,small Latter,one digit and one Special chracters";
+        public const string PasswordMaxLength = "Password Must Not Exceed 15 characters";
+        public const string PasswordValidation =
+            "Password Must contains atleast one Capital Latter,small Latter,one digit and one Special chracters";
+
+        public const string TicketPriceRangeValidation = "Ticket price must be greater than 0.";
+
+        public const string TotalSeatsRangeValidation = "Total seats must be at least 1.";
+
+        public const string DiscountPercentageValidation =
+            "Discount percentage must be between 1 and 100.";
+
+        public const string EventTimeRangeValidation = "Time had Invalid Format";
+
+        public const string EventTypeNameRequired = "Event Type Name Must Not be empty";
+        public const string EventTypeName = "Event Type Name Must Not Exceed 50 Characters";
+
+         public const string EventCategoryNameRequired = "Event Category Name Must Not be empty";
+        public const string EventCategoryName = "Event Category Name Must Not Exceed 50 Characters";
     }
 }

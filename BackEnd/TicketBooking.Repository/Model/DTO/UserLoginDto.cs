@@ -1,4 +1,3 @@
-
 using System.ComponentModel.DataAnnotations;
 using TicketBooking.Repository.Common;
 
@@ -8,7 +7,7 @@ namespace TicketBooking.Repository.Model.DTO
     {
         [Required(ErrorMessage = ValidationMessage.RequiredEmail)]
         [MaxLength(
-            Constant.EmailMaxLength,
+            ResonanceConstant.EmailMaxLength,
             ErrorMessage = ValidationMessage.EmailMaxLengthValidationMessage
         )]
         [RegularExpression(
@@ -19,5 +18,7 @@ namespace TicketBooking.Repository.Model.DTO
 
         [Required(ErrorMessage = ValidationMessage.PasswordRequired)]
         public string Password { get; set; } = string.Empty;
+
+        public Role Role { get; set; }
     }
 }

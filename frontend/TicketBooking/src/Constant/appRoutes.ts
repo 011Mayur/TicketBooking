@@ -1,8 +1,20 @@
 export const APP_ROUTES = Object.freeze({
-  LOGIN: "/login",
+  HOME: "/home",
+  ADMIN_LOGIN: "/admin-login",
+  USER_LOGIN: "/user-login",
   REGISTER: "/register",
   ADMIN: "/admin",
   USER: "/user",
+  ADMIN_EVENTS: "/admin/events",
   FORGOT_PASSWORD: "/forgot-password",
-  RESET_PASSWORD:"/reset-password",
-})
+  RESET_PASSWORD: "/reset-password",
+  PROFILE: "/profile",
+  EDIT_COUPON: (id: number) => `/admin/coupons/${id}/edit`,
+  CREATE_COUPON: "/admin/coupons/new",
+  EVENT: (id: number | string) => `/events/${id}`,
+  CHECKOUT: (eventId: number | string) => `/checkout/${eventId}`,
+  PAYMENT: (eventId: number | string) => `/checkout/${eventId}/payment`,
+  BOOKINGS: "/bookings",
+  EVENT_MANAGEMENT: "/admin/event-management",
+  MY_BOOKINGS: "/my-bookings"
+});
