@@ -16,5 +16,7 @@ namespace TicketBooking.Service.Service.Interface
         Task<CouponResponseDto?> GetCouponByIdAsync(int id);
 
         Task<List<CouponResponseDto>> GetAllActiveCouponsAsync();
+
+        Task<CouponValidationDto> ValidateCouponAsync(string code, int eventId, int userId);
     }
 }

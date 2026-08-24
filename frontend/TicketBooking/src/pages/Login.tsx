@@ -11,20 +11,28 @@ import api from "../Api/axios";
 import { API_ROUTES } from "../Constant/apiRoutes";
 import { MESSAGES } from "../Constant/messages";
 import { APP_ROUTES } from "../Constant/appRoutes";
+import { useAuth } from "../Hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { refreshUser } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      role: "Admin",
+    },
+  });
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const res = await api.post<LoginResponse>(API_ROUTES.AUTH.LOGIN, data);
+      await api.post<LoginResponse>(API_ROUTES.AUTH.LOGIN, data);
+      await refreshUser();
       toast.success(MESSAGES.AUTH.LOGIN_SUCCESS);
-      navigate(res.data.role === "Admin" ? "/admin" : "/user");
+      navigate(APP_ROUTES.ADMIN_EVENTS);
     } catch (err) {
       const axiosErr = err as AxiosError<ApiErrorResponse>;
       toast.error(
@@ -74,6 +82,7 @@ const Login = () => {
               error={!!errors.password}
               helperText={errors.password?.message}
             />
+            <input type="hidden" {...register("role")} />
             <Button
               type="submit"
               variant="contained"
@@ -96,13 +105,7 @@ const Login = () => {
             fontSize: "0.875rem",
           }}
         >
-          <Typography variant="body2">
-            Don't have an account?{" "}
-            <Link to={APP_ROUTES.REGISTER} style={{ color: "#4540e1" }}>
-              Register
-            </Link>
-          </Typography>
-          <Link to="/forgot-password" style={{ color: "#4540e1" }}>
+          <Link to={APP_ROUTES.FORGOT_PASSWORD} style={{ color: "#4540e1" }}>
             <Typography variant="body2">Forgot password?</Typography>
           </Link>
         </Box>

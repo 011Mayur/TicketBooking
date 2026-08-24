@@ -9,7 +9,7 @@ namespace TicketBooking.Repository.Model.DTO
 {
     public class CouponCreateDto
     {
-        [Required, MaxLength(Constant.CoupenCodeMaxLength)]
+        [Required, MaxLength(ResonanceConstant.CoupenCodeMaxLength)]
         public string Code { get; set; } = string.Empty;
 
         [Required, Range(1, 100, ErrorMessage = ValidationMessage.DiscountPercentageValidation)]

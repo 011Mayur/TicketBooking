@@ -1,22 +1,17 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.Forms;
 using TicketBooking.Repository.Common;
 
 namespace TicketBooking.Repository.Model.DTO
 {
     public class EventCreateDto
     {
-        [Required, MaxLength(Constant.TitleMaxLength)]
+        [Required, MaxLength(ResonanceConstant.TitleMaxLength)]
         public string Title { get; set; } = string.Empty;
 
-        [Required, MaxLength(Constant.NameMaxLength)]
+        [Required, MaxLength(ResonanceConstant.NameMaxLength)]
         public string ArtistName { get; set; } = string.Empty;
 
-        [Required, MaxLength(Constant.VenueMaxLength)]
+        [Required, MaxLength(ResonanceConstant.VenueMaxLength)]
         public string Venue { get; set; } = string.Empty;
 
         [Required]
@@ -43,6 +38,12 @@ namespace TicketBooking.Repository.Model.DTO
         ]
         public int TotalSeats { get; set; }
 
+        [
+            Required,
+            Range(1, int.MaxValue, ErrorMessage = ValidationMessage.EventCategoryNameRequired)
+        ]
+        public int EventCategoryId { get; set; }
+
         public required bool isActive = true;
 
         public int? BulkTicketForDiscount { get; set; }
@@ -52,5 +53,8 @@ namespace TicketBooking.Repository.Model.DTO
         public List<int> SelectedCouponIds { get; set; } = [];
 
         public string? PosterImageUrl { get; set; }
+
+        [Required, MaxLength(ResonanceConstant.DiscriptionLength)]
+        public string Description { get; set; } = string.Empty;
     }
 }

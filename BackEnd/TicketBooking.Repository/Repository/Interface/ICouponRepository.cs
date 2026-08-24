@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TicketBooking.Repository.Model.DTO;
 
 namespace TicketBooking.Repository.Repository.Interface
@@ -16,5 +12,11 @@ namespace TicketBooking.Repository.Repository.Interface
         Task<bool> HasUserUsedCouponAsync(int couponId, int userId);
 
         Task<List<CouponResponseDto>> GetAllActiveCouponsAsync();
+
+        Task<CouponValidationDto?> GetCouponForValidationAsync(
+            string code,
+            int eventId,
+            int userId
+        );
     }
 }

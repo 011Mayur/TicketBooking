@@ -13,6 +13,7 @@ export const MESSAGES = Object.freeze({
     FAILED_LOAD_COUPONS: "Failed to load coupons.",
     FAILED_DELETE_COUPON:"Failed to delete coupon.",
     FAILED_SAVE_COUPONS: "Failed to save coupons.",
+    
   },
   SUCCESS: {
     EVENT_DELETED: "Event deleted.",

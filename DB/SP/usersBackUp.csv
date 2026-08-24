@@ -1,0 +1,4 @@
+"id";"first_name";"last_name";"password_hash";"gender";"role";"date_of_birth";"mobile_number";"email";"is_active";"created_at";"updated_at"
+18;"admin";"user";"$2a$11$Vj5iJxaeQbFZwNFix6DF/OuKgnHplb78kBfZLe0k5ral1pJRzql0S";0;0;"2026-07-22 11:04:26.628000";"8095476173";"panchalmayur570@gmail.com";1;"2026-07-22 11:04:26.629000";""
+19;"PANCHAL";"MAYUR";"$2a$11$Vj5iJxaeQbFZwNFix6DF/OuKgnHplb78kBfZLe0k5ral1pJRzql0S";0;1;"2026-07-02 00:00:00.000000";"9876543210";"panchalmayur052@gmail.com";1;"2026-07-22 11:16:32.940157";""
+21;"PANCHAL";"MAYUR";"$2a$11$qn/cEJLPzmZOqi8.YM0RLu9YObT5VILWYZsjQQm95OpzLcQpDHRo2";0;1;"2026-07-31 00:00:00.000000";"9876543666";"panchalmay052@gmail.com";1;"2026-07-29 09:03:17.713920";""

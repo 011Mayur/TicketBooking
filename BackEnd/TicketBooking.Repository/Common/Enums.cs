@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace TicketBooking.Repository.Common
 {
     public enum Role
@@ -15,5 +10,21 @@ namespace TicketBooking.Repository.Common
     {
         Male = 0,
         Female = 1,
+    }
+
+    public enum BookingStatus
+    {
+        Pending,
+        Paid,
+        Failed,
+        Expired,
+        Cancelled,
+    }
+
+    public enum BookingDiscountType
+    {
+        None,
+        Bulk,
+        Coupon,
     }
 }

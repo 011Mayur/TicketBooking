@@ -32,7 +32,7 @@ namespace TicketBooking.Service.Service.Implementation
 
         public async Task<UserLoginResponseDto?> ValidateUserAsync(UserLoginDto login)
         {
-            UserLoginResponseDto? user = await _userRepo.GetUserByEmail(login.Email);
+            UserLoginResponseDto? user = await _userRepo.GetUserByEmailAndRole(login.Email, login.Role);
 
             if (user is null)
                 return null;
@@ -61,7 +61,7 @@ namespace TicketBooking.Service.Service.Implementation
 
             await _userRepo.CreateResetTokenAsync(user.Id, tokenHash, expiresAt);
 
-            string link = $"{frontendBaseUrl}/ResetPassword?token={rawToken}";
+            string link = $"{frontendBaseUrl}/reset-password?token={rawToken}";
             string body =
                 $"Click the link below to reset your password. This link expires in 30 minutes.\n\n{link}\n\nIf you didn't request this, ignore this email.";
 

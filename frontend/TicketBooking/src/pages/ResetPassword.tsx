@@ -40,7 +40,7 @@ const ResetPassword = () => {
         newPassword: data.newPassword,
       });
       toast.success(res.data.message);
-      navigate(APP_ROUTES.LOGIN);
+      navigate(APP_ROUTES.ADMIN_LOGIN);
     } catch {
       toast.error(MESSAGES.AUTH.LINK_EXPIRED);
     }

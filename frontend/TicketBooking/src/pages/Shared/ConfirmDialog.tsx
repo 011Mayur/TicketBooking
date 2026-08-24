@@ -5,17 +5,20 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  type ButtonProps,
 } from "@mui/material";
+import type { ReactNode } from "react";
 
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  message: string;
+  message: ReactNode;              
   loading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   abortButton: string;
   confirmButton: string;
+  confirmColor?: ButtonProps["color"]; 
 }
 
 const ConfirmDialog = ({
@@ -27,32 +30,19 @@ const ConfirmDialog = ({
   onCancel,
   abortButton,
   confirmButton,
+  confirmColor = "primary", 
 }: ConfirmDialogProps) => {
   return (
-    <Dialog
-      open={open}
-      onClose={loading ? undefined : onCancel}
-      aria-labelledby="confirm-dialog-title"
-    >
+    <Dialog open={open} onClose={loading ? undefined : onCancel} aria-labelledby="confirm-dialog-title">
       <DialogTitle id="confirm-dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
+        <DialogContentText component="div">{message}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={onCancel}
-          disabled={loading}
-        >
+        <Button variant="outlined" color="primary" onClick={onCancel} disabled={loading}>
           {abortButton}
         </Button>
-        <Button
-          onClick={onConfirm}
-          color="primary"
-          variant="contained"
-          disabled={loading}
-        >
+        <Button onClick={onConfirm} color={confirmColor} variant="contained" disabled={loading}>
           {loading ? "Loading..." : confirmButton}
         </Button>
       </DialogActions>

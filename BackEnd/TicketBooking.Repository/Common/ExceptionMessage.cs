@@ -2,7 +2,8 @@ namespace TicketBooking.Repository.Common
 {
     public class ExceptionMessage
     {
-        public static readonly string MinimumAge = $"You Must Be {Constant.MinimumAge} Year Old";
+        public static readonly string MinimumAge =
+            $"You Must Be {ResonanceConstant.MinimumAge} Year Old";
 
         public static readonly string NoFile = "No file was uploaded.";
 
@@ -26,11 +27,34 @@ namespace TicketBooking.Repository.Common
         public static readonly string FutureExpiryDate = "Expiry date must be in the future.";
         public static readonly string DulicateCoupon = "A coupon with this code already exists.";
 
-        #region config
+        public static string ResourceNotFound(int id, string resource) =>
+            $"{resource} with id:{id} does not found";
+
+        public static readonly string FailedDeleteCategory = "Failed to delete category";
 
         public static string KeyNotConfigured(string key) =>
             $"SMTP {key} is not configured or is empty";
 
-        #endregion
+        public static readonly string EventTypeDelete = "Failed to delete EventType";
+
+        public static readonly string MinimumQuntity = "Quantity must be at least 1.";
+
+        public static readonly string EventEnded =
+            "This event has already ended. Booking is closed.";
+
+        public static readonly string NotEnoughSeats = "Not enough seats available for this event.";
+
+        public static readonly string BulkDiscountNotEligible =
+            "Quantity does not meet the bulk discount threshold for this event.";
+        public static readonly string CouponCodeRequired =
+            "Coupon code is required when applying a coupon discount.";
+
+        public static string CouponNotFound(string code) => $"No coupon found with code '{code}'.";
+
+        public static readonly string CouponInactive = "This coupon is not currently active.";
+        public static readonly string CouponExpired = "This coupon has expired.";
+        public static readonly string CouponNotApplicableToEvent =
+            "This coupon is not valid for this event.";
+        public static readonly string CouponAlreadyUsed = "You have already used this coupon.";
     }
 }

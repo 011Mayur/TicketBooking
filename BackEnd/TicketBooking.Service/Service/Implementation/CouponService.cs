@@ -54,5 +54,36 @@ namespace TicketBooking.Service.Service.Implementation
         }
 
         public Task TogglCouponStatusAsync(int id) => _couponRepo.TogglCouponStatusAsync(id);
+
+        public async Task<CouponValidationDto> ValidateCouponAsync(
+            string code,
+            int eventId,
+            int userId
+        )
+        {
+            string normalizedCode = code.Trim().ToUpperInvariant(); 
+            CouponValidationDto? coupon = await _couponRepo.GetCouponForValidationAsync(
+                normalizedCode,
+                eventId,
+                userId
+            );
+
+            if (coupon is null)
+                throw new ResourceNotFoundException(ExceptionMessage.CouponNotFound(code));
+
+            if (!coupon.IsActive)
+                throw new BusinessRuleException(ExceptionMessage.CouponInactive);
+
+            if (coupon.ExpiryDate <= DateTime.UtcNow)
+                throw new BusinessRuleException(ExceptionMessage.CouponExpired);
+
+            if (!coupon.IsLinkedToEvent)
+                throw new BusinessRuleException(ExceptionMessage.CouponNotApplicableToEvent);
+
+            if (coupon.AlreadyUsedByUser)
+                throw new BusinessRuleException(ExceptionMessage.CouponAlreadyUsed);
+
+            return coupon;
+        }
     }
 }

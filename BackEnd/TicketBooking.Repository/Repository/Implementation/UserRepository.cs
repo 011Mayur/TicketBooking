@@ -13,9 +13,28 @@ namespace TicketBooking.Repository.Repository.Implementation
         private readonly AppDbContext _db = db;
         private readonly IConfiguration _config = config;
 
-        public async Task<UserLoginResponseDto?> GetUserByEmail(string Emaiil)
+        public async Task<UserLoginResponseDto?> GetUserByEmailAndRole(
+            string Emaiil,
+            Role Role = Role.User
+        )
         {
-            MySqlParameter parameters = new("@p_email", Emaiil);
+            MySqlParameter[] parameters = [new("@p_email", Emaiil), new("@p_role", Role)];
+
+            return await _db
+                .Database.SqlQueryRaw<UserLoginResponseDto>(
+                    "CALL get_user_by_email_role(@p_email,@p_role)",
+                    parameters
+                )
+                .AsAsyncEnumerable()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<UserLoginResponseDto?> GetUserByEmail(
+            string Emaiil
+            
+        )
+        {
+            MySqlParameter[] parameters = [new("@p_email", Emaiil)];
 
             return await _db
                 .Database.SqlQueryRaw<UserLoginResponseDto>(

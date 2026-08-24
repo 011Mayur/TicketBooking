@@ -5,13 +5,13 @@ namespace TicketBooking.Repository.Entity
 {
     public class Event : BaseEntity
     {
-        [MaxLength(Constant.TitleMaxLength)]
+        [MaxLength(ResonanceConstant.TitleMaxLength)]
         public string Title { get; set; } = string.Empty;
 
-        [MaxLength(Constant.NameMaxLength)]
+        [MaxLength(ResonanceConstant.NameMaxLength)]
         public string ArtistName { get; set; } = string.Empty;
 
-        [MaxLength(Constant.VenueMaxLength)]
+        [MaxLength(ResonanceConstant.VenueMaxLength)]
         public string Venue { get; set; } = string.Empty;
         public DateTime EventDate { get; set; }
         public TimeSpan EventTime { get; set; }
@@ -24,5 +24,10 @@ namespace TicketBooking.Repository.Entity
         public decimal? DiscountPercentage { get; set; }
 
         public string? PosterImageUrl { get; set; }
+
+        public required int EventCategoryId { get; set; }
+
+        [MaxLength(ResonanceConstant.DiscriptionLength)]
+        public string Description { get; set; } = string.Empty;
     }
 }

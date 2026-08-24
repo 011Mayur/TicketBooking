@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Model.DTO;
 
 namespace TicketBooking.Repository.Repository.Interface
 {
     public interface IUserRepository
     {
-        Task<UserLoginResponseDto?> GetUserByEmail(string email);
+        Task<UserLoginResponseDto?> GetUserByEmailAndRole(string email, Role Role = Role.User);
 
         Task<int> AddUserAsync(UserRegisterDto user);
 
@@ -24,5 +21,6 @@ namespace TicketBooking.Repository.Repository.Interface
         Task DeleteRefreshTokenAsync(string token);
 
         Task<UserLoginResponseDto?> GetUserByIdAsync(int userId);
+        Task<UserLoginResponseDto?> GetUserByEmail(string Emaiil);
     }
 }

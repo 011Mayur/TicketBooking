@@ -12,3 +12,5 @@ DELIMITER ;
 select * from events
 
 select * from 
+
+select * from coupons

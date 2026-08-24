@@ -5,9 +5,12 @@ namespace TicketBooking.Repository.Entity
 {
     public class Coupon : BaseEntity
     {
-        [MaxLength(Constant.CoupenCodeMaxLength)]
+        [MaxLength(ResonanceConstant.CoupenCodeMaxLength)]
         public string Code { get; set; } = string.Empty;
         public decimal DiscountPercentage { get; set; }
         public DateTime ExpiryDate { get; set; }
+
+        [MaxLength(ResonanceConstant.CouponDescriptionLength)]
+        public string Description { get; set; } = string.Empty;
     }
 }

@@ -26,7 +26,7 @@ const ForgotPassword = () => {
     try {
       const res = await api.post(API_ROUTES.AUTH.FORGOT_PASSWORD, data);
       toast.success(res.data.message);
-      setTimeout(() => navigate(APP_ROUTES.LOGIN), 1500);
+      setTimeout(() => navigate(APP_ROUTES.ADMIN_LOGIN), 1500);
     } catch {
       toast.error(MESSAGES.GENERAL_ERROR);
     }
@@ -78,7 +78,7 @@ const ForgotPassword = () => {
         </form>
 
         <Typography sx={{ mt: 3, textAlign: "center", fontSize: "0.875rem" }}>
-          <Link to={APP_ROUTES.LOGIN} style={{ color: "#4540e1" }}>
+          <Link to={APP_ROUTES.ADMIN_LOGIN} style={{ color: "#4540e1" }}>
             Back to login
           </Link>
         </Typography>

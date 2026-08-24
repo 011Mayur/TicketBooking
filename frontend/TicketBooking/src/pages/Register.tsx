@@ -9,29 +9,32 @@ import {
   Box,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 import { AxiosError } from "axios";
-import type { ApiErrorResponse } from "../Common/interface";
+
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 import {
   registerSchema,
   type RegisterFormValues,
 } from "../zodSchema/registerSchema";
-import api from "../Api/axios";
 import { API_ROUTES } from "../Constant/apiRoutes";
+import api from "../Api/axios";
 import { MESSAGES } from "../Constant/messages";
 import { APP_ROUTES } from "../Constant/appRoutes";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
+import type { ApiErrorResponse } from "../Common/interface";
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const {
     register,
     handleSubmit,
     control,
-    setError,
+
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({ resolver: zodResolver(registerSchema) });
 
@@ -40,16 +43,18 @@ const Register = () => {
       const { ...rest } = data;
       await api.post(API_ROUTES.AUTH.REGISTER, { ...rest, role: "User" });
       toast.success(MESSAGES.AUTH.REGISTER_SUCCESS);
-      navigate(APP_ROUTES.LOGIN);
+
+      const from = location.state?.from;
+      const checkoutState = location.state?.state;
+
+      navigate(APP_ROUTES.USER_LOGIN, {
+        state: {
+          from,
+          state: checkoutState,
+        },
+      });
     } catch (err) {
       const axiosErr = err as AxiosError<ApiErrorResponse>;
-
-      if (axiosErr.response?.status === 409 && axiosErr.response.data.field) {
-        const { field, message } = axiosErr.response.data;
-        setError(field as keyof RegisterFormValues, { message });
-        toast.error(message);
-        return;
-      }
 
       toast.error(
         axiosErr.response?.data?.message ?? MESSAGES.AUTH.REGISTER_FAIL_DEFAULT,
@@ -73,8 +78,10 @@ const Register = () => {
         elevation={3}
         sx={{ width: "100%", maxWidth: 400, p: { xs: 3, sm: 4 } }}
       >
-        {" "}
-        <Typography variant="h5" className="mb-6 text-center font-semibold">
+        <Typography
+          variant="h5"
+          sx={{ mb: 3, textAlign: "center", fontWeight: 600 }}
+        >
           Create an account
         </Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -190,7 +197,7 @@ const Register = () => {
         </form>
         <Typography sx={{ mt: 3, textAlign: "center", fontSize: "0.875rem" }}>
           Already have an account?{" "}
-          <Link to="/login" style={{ color: "#4540e1" }}>
+          <Link to={APP_ROUTES.USER_LOGIN} style={{ color: "#4540e1" }}>
             Log in
           </Link>
         </Typography>
@@ -198,4 +205,5 @@ const Register = () => {
     </Box>
   );
 };
+
 export default Register;

@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using TicketBooking.Repository.Entity;
 using TicketBooking.Repository.Model.DTO;
 
 namespace TicketBooking.Repository.Repository.Interface
@@ -13,8 +10,23 @@ namespace TicketBooking.Repository.Repository.Interface
         Task<int> UpdateEventAsync(EventUpdateDto dto);
         Task DeleteEventAsync(int id);
         Task<(List<EventResponseDto> Items, int TotalCount)> GetPagedEventsAsync(
-            EventSearchParameter query
+            EventSearchParameter query,
+            int categoryId
         );
         Task<EventPosterDto?> GetEventPosterByIdAsync(int id);
+
+        Task<List<HomePageEvent>> GetEventsAsync(int page, int? typeId = null);
+
+        Task<bool> HasNextPageAsync(int page, int? typeId = null);
+
+        Task<EventForBooking?> GetEventForBooking(int id);
+
+        Task<bool> HasSearchNextPageAsync(string? searchQuery, int page, int? typeId = null);
+
+        Task<List<HomePageEvent>> SearchEventsAsync(
+            string? searchQuery,
+            int page,
+            int? typeId = null
+        );
     }
 }

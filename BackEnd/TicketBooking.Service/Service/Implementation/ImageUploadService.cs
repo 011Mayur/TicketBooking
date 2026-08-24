@@ -93,7 +93,7 @@ namespace TicketBooking.Service.Service.Implementation
         {
             using var reader = new BinaryReader(file.OpenReadStream());
             var bytes = reader.ReadBytes(8);
-            // JPEG: FF D8 FF | PNG: 89 50 4E 47
+       
             bool isJpeg =
                 bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF;
             bool isPng =

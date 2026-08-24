@@ -1,0 +1,44 @@
+using Microsoft.Extensions.Logging;
+using Quartz;
+using TicketBooking.Repository.Repository.Interface;
+using TicketBooking.Service.Service.Interface;
+
+namespace TicketBooking.Service.BackgroundJobs
+{
+    /// <summary>
+    /// Background job to expire stale booking locks (15+ mins old)
+    /// and release expired bookings
+    /// Runs every 5 minutes
+    /// </summary>
+    [DisallowConcurrentExecution]
+    public class LockExpiryBackgroundJob(
+        IBookingLockRepository bookingLockRepo,
+        IBookingService bookingService,
+        ILogger<LockExpiryBackgroundJob> logger
+    ) : IJob
+    {
+        private readonly IBookingLockRepository _bookingLockRepo = bookingLockRepo;
+        private readonly IBookingService _bookingService = bookingService;
+        private readonly ILogger<LockExpiryBackgroundJob> _logger = logger;
+
+        public async Task Execute(IJobExecutionContext context)
+        {
+            try
+            {
+                _logger.LogInformation("Starting lock expiry background job...");
+
+                // Delete expired locks
+                int expiredLocksCount = await _bookingLockRepo.DeleteExpiredLocksAsync();
+                _logger.LogInformation($"Deleted {expiredLocksCount} expired locks");
+
+                // Expire stale pending bookings
+                await _bookingService.ExpireStaleBookingsAsync();
+                _logger.LogInformation("Expired stale bookings");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in lock expiry background job: {ex.Message}");
+            }
+        }
+    }
+}

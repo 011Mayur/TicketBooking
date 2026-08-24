@@ -39,37 +39,40 @@ export const eventSchema = z
       .number({ error: "Ticket price must be a number" })
       .int()
       .positive("Total seats must be at least 1"),
+    enableBulkDiscount: z.boolean().optional(),
 
-    bulkTicketForDiscount: z.coerce
-      .number()
+    bulkTicketForDiscount: z
+      .union([z.coerce.number(), z.literal("")])
+      .optional(),
+    discountPercentage: z.union([z.coerce.number(), z.literal("")]).optional(),
+    eventCategoryId: z.coerce
+      .number({ error: "Please select an event category" })
       .int()
-      .positive("Ticket Count Must be greter than 0")
-      .optional(),
-    discountPercentage: z.coerce
-      .number()
-      .positive("Discount Must be greter than 0")
-      .max(100, "Percentage must be between 0 and 100")
-      .optional(),
-   
+      .positive("Please select an event category"),
+    description: z
+      .string()
+      .min(1, "discription is required")
+      .max(300, "discription Must Not Exceed 300 Characters"),
   })
   .superRefine((data, ctx) => {
-    const hasTicket = data.bulkTicketForDiscount !== undefined;
-    const hasDiscount = data.discountPercentage !== undefined;
 
-    if (hasTicket !== hasDiscount) {
-      if (!hasTicket) {
+
+    if (data.enableBulkDiscount) {
+      if (
+        !data.bulkTicketForDiscount ||
+        Number(data.bulkTicketForDiscount) < 1
+      ) {
         ctx.addIssue({
-          code: "custom",
           path: ["bulkTicketForDiscount"],
-          message: "Required when discount is enabled",
+          code: z.ZodIssueCode.custom,
+          message: "Ticket Count must be greater than 0",
         });
       }
-
-      if (!hasDiscount) {
+      if (!data.discountPercentage || Number(data.discountPercentage) < 1) {
         ctx.addIssue({
-          code: "custom",
           path: ["discountPercentage"],
-          message: "Required when discount is enabled",
+          code: z.ZodIssueCode.custom,
+          message: "Discount Percentage must be greater than 0",
         });
       }
     }

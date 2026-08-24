@@ -6,3 +6,5 @@ SELECT id, first_name, last_name, email,password_hash, role FROM users WHERE ema
 END //
 
 DELIMITER ;
+
+select * from users

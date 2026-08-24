@@ -1,13 +1,21 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 using TicketBooking.Repository.Common;
 
 namespace TicketBooking.WebApi.Middleware
 {
-    public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+    public class ExceptionMiddleware(
+        RequestDelegate next,
+        ILogger<ExceptionMiddleware> logger,
+        IOptions<JsonOptions> jsonOptions
+    )
     {
         private readonly RequestDelegate _next = next;
         private readonly ILogger<ExceptionMiddleware> _logger = logger;
+
+        private readonly JsonSerializerOptions _jsonOptions = jsonOptions.Value.SerializerOptions;
 
         public async Task InvokeAsync(HttpContext context)
         {
@@ -17,85 +25,93 @@ namespace TicketBooking.WebApi.Middleware
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unhandled exception occurred");
+
+                if (context.Response.HasStarted)
+                {
+                    _logger.LogError(ex, "Exception after response started");
+                    throw;
+                }
+
                 await HandleExceptionAsync(context, ex);
             }
         }
 
         private async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
-            if (context.Response.HasStarted)
-            {
-                _logger.LogError(ex, "Exception after response started");
-                throw ex;
-            }
-
-            var response = MapException(ex);
+            (int StatusCode, object Body) = MapException(ex);
 
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = response.StatusCode;
+            context.Response.StatusCode = StatusCode;
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response.Body));
+            await context.Response.WriteAsync(
+                JsonSerializer.Serialize(Body, _jsonOptions)
+            );
         }
 
         private (int StatusCode, object Body) MapException(Exception ex)
         {
             return ex switch
             {
-           
                 DuplicateFieldException dup => (
                     StatusCodes.Status409Conflict,
-                    (object)
-                        new
-                        {
-                            field = dup.Field,
-                            message = dup.Message,
-                            errorCode = "DUPLICATE_FIELD",
-                        }
+                    new ApiErrorResponse
+                    {
+                        Message = dup.Message,
+                        ErrorCode = "DUPLICATE_FIELD",
+                        Details = new { dup.Field },
+                    }
                 ),
 
                 ResourceNotFoundException notFound => (
                     StatusCodes.Status404NotFound,
-                    new
+                    new ApiErrorResponse
                     {
-                        message = notFound.Message,
-                        resourceType = notFound.ResourceType,
-                        resourceId = notFound.ResourceId,
-                        errorCode = "RESOURCE_NOT_FOUND",
+                        Message = notFound.Message,
+                        ErrorCode = "RESOURCE_NOT_FOUND",
+                        Details = new { notFound.ResourceType, notFound.ResourceId },
                     }
                 ),
 
                 ValidationException val => (
                     StatusCodes.Status400BadRequest,
-                    (object)
-                        new
-                        {
-                            message = val.Message,
-                            errors = val.Errors ?? new(),
-                            errorCode = "VALIDATION_FAILED",
-                        }
+                    new ApiErrorResponse
+                    {
+                        Message = val.Message,
+                        ErrorCode = "VALIDATION_FAILED",
+                        Errors = val.Errors ?? [],
+                    }
                 ),
 
                 BusinessRuleException businessRule => (
                     StatusCodes.Status422UnprocessableEntity,
-                    new { message = businessRule.Message, errorCode = "BUSINESS_RULE_VIOLATION" }
+                    new ApiErrorResponse
+                    {
+                        Message = businessRule.Message,
+                        ErrorCode = "BUSINESS_RULE_VIOLATION",
+                    }
                 ),
 
                 ArgumentException argEx => (
                     StatusCodes.Status400BadRequest,
-                    new { message = argEx.Message, errorCode = "INVALID_ARGUMENT" }
+                    new ApiErrorResponse { Message = argEx.Message, ErrorCode = "INVALID_ARGUMENT" }
                 ),
 
                 MySqlException sqlEx => (
                     StatusCodes.Status500InternalServerError,
-                    new { message = "A database error occurred.", errorCode = "DATABASE_ERROR" }
+                    new ApiErrorResponse
+                    {
+                        Message = "A database error occurred.",
+                        ErrorCode = "DATABASE_ERROR",
+                    }
                 ),
 
                 _ => (
                     StatusCodes.Status500InternalServerError,
-                    new
+                    new ApiErrorResponse
                     {
-                        message = "An unexpected error occurred.",
-                        errorCode = "INTERNAL_SERVER_ERROR",
+                        Message = "An unexpected error occurred.",
+                        ErrorCode = "INTERNAL_SERVER_ERROR",
                     }
                 ),
             };

@@ -96,7 +96,9 @@ const CouponForm = () => {
         return;
       }
 
-      toast.error(axiosErr.response?.data?.message ?? MESSAGES.ERROR.FAILED_SAVE_COUPONS);
+      toast.error(
+        axiosErr.response?.data?.message ?? MESSAGES.ERROR.FAILED_SAVE_COUPONS,
+      );
     }
   };
 
@@ -117,7 +119,6 @@ const CouponForm = () => {
         minHeight: "auto",
       }}
     >
-     
       <Paper
         elevation={4}
         sx={{ width: "100%", maxWidth: 500, p: { xs: 3, sm: 4 } }}
@@ -132,7 +133,7 @@ const CouponForm = () => {
               label="Coupon Code"
               fullWidth
               {...register("code")}
-                size="small"
+              size="small"
               error={!!errors.code}
               helperText={errors.code?.message}
             />
@@ -140,12 +141,13 @@ const CouponForm = () => {
               label="Discount Percentage"
               type="number"
               fullWidth
-                size="small"
+              size="small"
               slotProps={{ htmlInput: { min: 1, max: 100 } }}
               {...register("discountPercentage", { valueAsNumber: true })}
               error={!!errors.discountPercentage}
               helperText={errors.discountPercentage?.message}
             />
+
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Controller
                 name="expiryDate"

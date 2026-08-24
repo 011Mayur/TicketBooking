@@ -7,6 +7,8 @@ namespace TicketBooking.Repository.Common
 {
     public class ValidationMessage
     {
+
+        public const string PositiveId="Id can't be zero";
         public const string RequiredEmail = "Email Is required";
 
         public const string ReuiredPassword = "Password is required";
@@ -41,8 +43,15 @@ namespace TicketBooking.Repository.Common
 
         public const string TotalSeatsRangeValidation = "Total seats must be at least 1.";
 
-        public const string DiscountPercentageValidation = "Discount percentage must be between 1 and 100.";
+        public const string DiscountPercentageValidation =
+            "Discount percentage must be between 1 and 100.";
 
         public const string EventTimeRangeValidation = "Time had Invalid Format";
+
+        public const string EventTypeNameRequired = "Event Type Name Must Not be empty";
+        public const string EventTypeName = "Event Type Name Must Not Exceed 50 Characters";
+
+         public const string EventCategoryNameRequired = "Event Category Name Must Not be empty";
+        public const string EventCategoryName = "Event Category Name Must Not Exceed 50 Characters";
     }
 }

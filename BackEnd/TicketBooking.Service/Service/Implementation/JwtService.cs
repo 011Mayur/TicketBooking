@@ -26,6 +26,8 @@ namespace TicketBooking.Service.Service.Implementation
             [
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Email),
+                new(JwtRegisteredClaimNames.GivenName, user.FirstName),
+                new(JwtRegisteredClaimNames.FamilyName, user.LastName),
                 new(ClaimTypes.Role, user.Role.ToString()),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             ];

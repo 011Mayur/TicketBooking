@@ -6,13 +6,16 @@ import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import { theme } from "./Theme/Theme.ts";
+import { AuthProvider } from "./Context/AuthProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  <StrictMode >
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
-      <ToastContainer position="top-right" autoClose={3000} />
+      <AuthProvider>
+        <App />
+        <ToastContainer position="top-right" autoClose={3000} />
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>,
 );

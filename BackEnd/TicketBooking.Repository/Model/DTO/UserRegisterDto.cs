@@ -13,7 +13,7 @@ public class UserRegisterDto
     public required string LastName { get; set; }
 
     [MaxLength(
-        Constant.EmailMaxLength,
+        ResonanceConstant.EmailMaxLength,
         ErrorMessage = ValidationMessage.EmailMaxLengthValidationMessage
     )]
     [RegularExpression(
@@ -24,7 +24,7 @@ public class UserRegisterDto
 
     [Required]
     [MaxLength(
-        Constant.MobileNumberLength,
+        ResonanceConstant.MobileNumberLength,
         ErrorMessage = ValidationMessage.MobileMaxLengthValidationMessage
     )]
     [RegularExpression(@"^[6-9]\d{9}$", ErrorMessage = ValidationMessage.MobileValidationMessage)]

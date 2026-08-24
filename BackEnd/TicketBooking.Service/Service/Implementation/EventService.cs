@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Model.DTO;
@@ -90,10 +86,30 @@ namespace TicketBooking.Service.Service.Implementation
             }
         }
 
+        public async Task<List<HomePageEvent>> GetEventsAsync(int page, int? typeId = null)
+        {
+            return await _eventRepo.GetEventsAsync(page, typeId);
+        }
+
+        public async Task<bool> HasNextPageAsync(int page, int? typeId = null)
+        {
+            return await _eventRepo.HasNextPageAsync(page, typeId);
+        }
+
+        public async Task<EventForBooking> GetEventForBooking(int id)
+        {
+            EventForBooking? result = await _eventRepo.GetEventForBooking(id);
+            if (result is null)
+                throw new ResourceNotFoundException(ExceptionMessage.ResourceNotFound(id, "Event"));
+
+            return result;
+        }
+
         public Task DeleteEventAsync(int id) => _eventRepo.DeleteEventAsync(id);
 
         public async Task<PagedResult<EventResponseDto>> GetPagedEventsAsync(
-            EventSearchParameter query
+            EventSearchParameter query,
+            int categoryId
         )
         {
             if (!AllowedSortColumns.Contains(query.SortColumn))
@@ -102,7 +118,10 @@ namespace TicketBooking.Service.Service.Implementation
             query.Page = Math.Max(query.Page, 1);
             query.PageSize = Math.Clamp(query.PageSize, 1, 100);
 
-            var (items, totalCount) = await _eventRepo.GetPagedEventsAsync(query);
+            (List<EventResponseDto> items, int totalCount) = await _eventRepo.GetPagedEventsAsync(
+                query,
+                categoryId
+            );
 
             return new PagedResult<EventResponseDto>
             {
@@ -111,6 +130,24 @@ namespace TicketBooking.Service.Service.Implementation
                 Page = query.Page,
                 PageSize = query.PageSize,
             };
+        }
+
+        public async Task<List<HomePageEvent>> SearchEventsAsync(
+            string? searchQuery,
+            int page,
+            int? typeId = null
+        )
+        {
+            return await _eventRepo.SearchEventsAsync(searchQuery, page, typeId);
+        }
+
+        public async Task<bool> HasSearchNextPageAsync(
+            string? searchQuery,
+            int page,
+            int? typeId = null
+        )
+        {
+            return await _eventRepo.HasSearchNextPageAsync(searchQuery, page, typeId);
         }
     }
 }

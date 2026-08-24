@@ -60,7 +60,7 @@ namespace TicketBooking.Repository.Repository.Implementation
             return coupons;
         }
 
-           public async Task<List<CouponResponseDto>> GetAllActiveCouponsAsync()
+        public async Task<List<CouponResponseDto>> GetAllActiveCouponsAsync()
         {
             List<CouponResponseDto> coupons = [];
             await using MySqlConnection connection = new(ConnectionString);
@@ -136,6 +136,38 @@ namespace TicketBooking.Repository.Repository.Implementation
 
             object? result = await command.ExecuteScalarAsync();
             return Convert.ToInt32(result) > 0;
+        }
+
+        public async Task<CouponValidationDto?> GetCouponForValidationAsync(
+            string code,
+            int eventId,
+            int userId
+        )
+        {
+            await using MySqlConnection connection = new(ConnectionString);
+            await connection.OpenAsync();
+
+            await using MySqlCommand command = new("get_coupon_for_booking_validation", connection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.Add(new("@p_code", code));
+            command.Parameters.Add(new("@p_event_id", eventId));
+            command.Parameters.Add(new("@p_user_id", userId));
+
+            await using MySqlDataReader reader = (MySqlDataReader)
+                await command.ExecuteReaderAsync();
+            if (!await reader.ReadAsync())
+                return null;
+
+            return new CouponValidationDto
+            {
+                Id = reader.GetInt32("id"),
+                Code = reader.GetString("code"),
+                DiscountPercentage = reader.GetDecimal("discount_percentage"),
+                ExpiryDate = reader.GetDateTime("expiry_date"),
+                IsActive = reader.GetBoolean("is_active"),
+                IsLinkedToEvent = reader.GetBoolean("is_linked_to_event"),
+                AlreadyUsedByUser = reader.GetBoolean("already_used_by_user"),
+            };
         }
 
         private static CouponResponseDto MapCoupon(MySqlDataReader reader) =>
