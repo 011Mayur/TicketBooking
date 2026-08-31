@@ -16,12 +16,14 @@ import {
   couponSchema,
   type CouponFormValues,
 } from "../../zodSchema/couponSchema";
-import type { Coupon } from "../../Common/interface";
-import api from "../../Api/axios";
+import type { Coupon } from "../../types";
+import api from "../../api/axios";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { MESSAGES } from "../../Constant/messages";
+import { MESSAGES } from "../../constants/messages";
+import { API_ROUTES } from "../../constants/apiRoutes";
+import { APP_ROUTES } from "../../constants/appRoutes";
 
 const CouponForm = () => {
   const navigate = useNavigate();
@@ -52,7 +54,7 @@ const CouponForm = () => {
 
     const fetchCoupon = async () => {
       try {
-        const res = await api.get<Coupon>(`/coupon/GetById/${id}`);
+        const res = await api.get<Coupon>(API_ROUTES.COUPON.GET_BY_ID(id!));
         const coupon = res.data;
         reset({
           code: coupon.code,
@@ -62,7 +64,7 @@ const CouponForm = () => {
         });
       } catch {
         toast.error(MESSAGES.ERROR.FAILED_LOAD_COUPONS);
-        navigate("/admin/coupons");
+        navigate(APP_ROUTES.ADMIN_COUPONS);
       } finally {
         setLoading(false);
       }
@@ -74,17 +76,17 @@ const CouponForm = () => {
   const onSubmit = async (data: CouponFormValues) => {
     try {
       if (isEditMode) {
-        await api.put(`/Coupon/Update/${id}`, {
+        await api.put(API_ROUTES.COUPON.UPDATE(id!), {
           id: Number(id),
           ...data,
           isActive: true,
         });
         toast.success(MESSAGES.SUCCESS.UPDATED_COUPON);
       } else {
-        await api.post("/coupon/Create", data);
+        await api.post(API_ROUTES.COUPON.CREATE, data);
         toast.success(MESSAGES.SUCCESS.CREATED_COUPON);
       }
-      navigate("/admin/coupons");
+      navigate(APP_ROUTES.ADMIN_COUPONS);
     } catch (err) {
       const axiosErr = err as AxiosError<{ field?: string; message?: string }>;
 
@@ -187,7 +189,7 @@ const CouponForm = () => {
                 type="button"
                 variant="outlined"
                 fullWidth
-                onClick={() => navigate("/admin/coupons")}
+                onClick={() => navigate(APP_ROUTES.ADMIN_COUPONS)}
                 disabled={isSubmitting}
                 sx={{ minHeight: 44 }}
               >

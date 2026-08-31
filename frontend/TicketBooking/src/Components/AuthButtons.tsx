@@ -2,7 +2,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { APP_ROUTES } from "../Constant/appRoutes";
+import { APP_ROUTES } from "../constants/appRoutes";
 
 const AuthButtons = () => {
   const navigate = useNavigate();

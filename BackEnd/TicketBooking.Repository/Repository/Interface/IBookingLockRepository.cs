@@ -35,5 +35,11 @@ namespace TicketBooking.Repository.Repository.Interface
         Task<int> DeleteExpiredLocksAsync();
 
         Task<int> GetTotalLockedQuantityAsync(int eventId);
+
+        /// <summary>
+        /// Deletes any existing active lock for the given user+event pair.
+        /// Called before creating a new lock to prevent duplicate locks.
+        /// </summary>
+        Task DeleteExistingLockForUserAsync(int userId, int eventId);
     }
 }

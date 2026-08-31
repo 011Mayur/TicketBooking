@@ -11,8 +11,8 @@ import {
 import PushPinIcon from "@mui/icons-material/PushPin";
 import EventIcon from "@mui/icons-material/Event";
 import { useNavigate } from "react-router-dom";
-import { APP_ROUTES } from "../Constant/appRoutes";
-import type { HomePageEvent } from "../Common/interface";
+import { APP_ROUTES } from "../constants/appRoutes";
+import type { HomePageEvent } from "../types";
 import { useRef, useState } from "react";
 interface EventCardProps {
   event: HomePageEvent;

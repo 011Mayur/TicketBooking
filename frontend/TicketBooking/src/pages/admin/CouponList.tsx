@@ -20,12 +20,12 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
-import type { Coupon } from "../../Common/interface";
-import api from "../../Api/axios";
-import ConfirmDialog from "../Shared/ConfirmDialog";
-import { API_ROUTES } from "../../Constant/apiRoutes";
-import { APP_ROUTES } from "../../Constant/appRoutes";
-import { MESSAGES } from "../../Constant/messages";
+import type { Coupon } from "../../types";
+import api from "../../api/axios";
+import ConfirmDialog from "../shared/ConfirmDialog";
+import { API_ROUTES } from "../../constants/apiRoutes";
+import { APP_ROUTES } from "../../constants/appRoutes";
+import { MESSAGES } from "../../constants/messages";
 
 const CouponList = () => {
   const navigate = useNavigate();
@@ -45,11 +45,13 @@ const CouponList = () => {
     setAnchorEl(event.currentTarget);
     setMenuRowId(couponId);
   };
+
   const handleMenuClose = () => {
     setAnchorEl(null);
     setMenuRowId(null);
   };
 
+  // Single canonical fetch — no duplicate IIFE
   const fetchCoupons = useCallback(async () => {
     setLoading(true);
     try {
@@ -63,24 +65,8 @@ const CouponList = () => {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await api.get<Coupon[]>(API_ROUTES.COUPON.GET_ALL);
-        if (!cancelled) setCoupons(res.data);
-      } catch {
-        if (!cancelled) toast.error(MESSAGES.ERROR.FAILED_LOAD_COUPONS);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    fetchCoupons();
+  }, [fetchCoupons]);
 
   const handleEdit = (id: number) => {
     navigate(APP_ROUTES.EDIT_COUPON(id));
@@ -125,7 +111,7 @@ const CouponList = () => {
   };
 
   return (
-    <div className="p-6">
+    <Box sx={{ p: 3 }}>
       <Box
         sx={{
           display: "flex",
@@ -236,10 +222,10 @@ const CouponList = () => {
         loading={toggling}
         onConfirm={handleToggleConfirm}
         onCancel={handleToggleCancel}
-        abortButton="cancle"
-        confirmButton={toggleTarget?.isActive ? "Deactive" : "Active"}
+        abortButton="Cancel"
+        confirmButton={toggleTarget?.isActive ? "Deactivate" : "Activate"}
       />
-    </div>
+    </Box>
   );
 };
 

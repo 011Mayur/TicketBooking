@@ -1,4 +1,4 @@
-import type { EventSortColumn, SortDir } from "../Common/types";
+import type { EventSortColumn, SortDir } from "../types";
 
 export interface SortOption {
   field: EventSortColumn;

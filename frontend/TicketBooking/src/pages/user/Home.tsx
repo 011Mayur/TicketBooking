@@ -8,11 +8,11 @@ import {
   useTheme,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useAllEventsFeed } from "../../Hooks/useAllEventsFeed";
-import { useEventTypes } from "../../Hooks/useEventTypes";
-import { useTypeEventRow } from "../../Hooks/useTypeEventRow";
-import EventCarousel from "../../Components/EventCarousel";
-import TypeFilterChips from "../../Components/TypeFilterChips";
+import { useAllEventsFeed } from "../../hooks/event/useAllEventsFeed";
+import { useEventTypes } from "../../hooks/event/useEventTypes";
+import { useTypeEventRow } from "../../hooks/event/useTypeEventRow";
+import EventCarousel from "../../components/EventCarousel";
+import TypeFilterChips from "../../components/TypeFilterChips";
 
 const Home = () => {
   const theme = useTheme();

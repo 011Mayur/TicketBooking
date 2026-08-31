@@ -23,17 +23,17 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import EventIcon from "@mui/icons-material/Event";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { toast } from "react-toastify";
-import api from "../Api/axios";
-import { API_ROUTES } from "../Constant/apiRoutes";
+import api from "../api/axios";
+import { API_ROUTES } from "../constants/apiRoutes";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import { APP_ROUTES } from "../Constant/appRoutes";
+import { APP_ROUTES } from "../constants/appRoutes";
 import SettingsIcon from "@mui/icons-material/Settings";
 const DRAWER_WIDTH = 240;
 
 const NAV_ITEMS = [
-  { label: "Events", path: "/admin/events", icon: <EventIcon /> },
-  { label: "Coupons", path: "/admin/coupons", icon: <LocalOfferIcon /> },
+  { label: "Events", path: APP_ROUTES.ADMIN_EVENTS, icon: <EventIcon /> },
+  { label: "Coupons", path: APP_ROUTES.ADMIN_COUPONS, icon: <LocalOfferIcon /> },
   {
     label: "Event type",
     path: APP_ROUTES.EVENT_MANAGEMENT,
@@ -56,7 +56,7 @@ const AdminLayout = () => {
 
   const handleMyProfile = () => {
     handleMenuClose();
-    navigate("/profile");
+    navigate(APP_ROUTES.PROFILE);
   };
 
   const handleLogout = async () => {
@@ -134,7 +134,7 @@ const AdminLayout = () => {
           <Typography
             variant="h6"
             component={Link}
-            to="/"
+            to={APP_ROUTES.HOME}
             sx={{ color: "inherit", textDecoration: "none", fontWeight: 600 }}
           >
             Resonance

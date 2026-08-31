@@ -5,16 +5,15 @@ import PaymentDetailsCard from "./PaymentDetailsCard";
 import OrderSummaryCard from "./OrderSummaryCard";
 import PaymentLoginDialog from "./PaymentLoginDialog";
 import PaymentStateScreen from "./PaymentStateScreen";
-import { useAuth } from "../../../Hooks/useAuth";
-import type { BookingResponse, EventResponse } from "../../../Common/interface";
-import { usePaymentData } from "../../../Hooks/usePaymentData";
-import { useRazorpayScript } from "../../../Hooks/useRazorPayScript";
-import { usePaymentOrder } from "../../../Hooks/usePaymentOrder";
-import { usePaymentSuccessRedirect } from "../../../Hooks/usePaymentSuccessRedirect";
-import { useRazorpayCheckout } from "../../../Hooks/useRazorPayCheckout";
+import { useAuth } from "../../../hooks/auth/useAuth";
+import type { BookingResponse, EventResponse } from "../../../types";
+import { usePaymentData } from "../../../hooks/payment/usePaymentData";
+import { useRazorpayScript } from "../../../hooks/payment/useRazorPayScript";
+import { usePaymentOrder } from "../../../hooks/payment/usePaymentOrder";
+import { usePaymentSuccessRedirect } from "../../../hooks/payment/usePaymentSuccessRedirect";
+import { useRazorpayCheckout } from "../../../hooks/payment/useRazorPayCheckout";
 import PaymentEventHeader from "./PaymentEventHeader";
-import { APP_ROUTES } from "../../../Constant/appRoutes";
-import { useEffect } from "react";
+import { APP_ROUTES } from "../../../constants/appRoutes";
 
 const Payment = () => {
   // ========================================

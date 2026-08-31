@@ -1,5 +1,5 @@
 import { Box, Typography, Skeleton } from "@mui/material";
-import type { EventResponse } from "../../../Common/interface";
+import type { EventResponse } from "../../../types";
 
 const PaymentEventHeader = ({ event }: { event: EventResponse | null }) => {
   if (!event) {

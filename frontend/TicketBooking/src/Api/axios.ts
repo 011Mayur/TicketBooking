@@ -1,6 +1,6 @@
 import axios from "axios";
-import { API_ROUTES } from "../Constant/apiRoutes";
-import type { ApiErrorResponse } from "../Common/interface";
+import { API_ROUTES } from "../constants/apiRoutes";
+import type { ApiErrorResponse } from "../types";
 
 const api = axios.create({
   baseURL: "http://localhost:5000/api",

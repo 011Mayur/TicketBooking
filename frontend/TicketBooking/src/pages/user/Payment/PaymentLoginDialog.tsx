@@ -7,7 +7,7 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { APP_ROUTES } from "../../../Constant/appRoutes";
+import { APP_ROUTES } from "../../../constants/appRoutes";
 
 const PaymentLoginDialog = ({
   open,

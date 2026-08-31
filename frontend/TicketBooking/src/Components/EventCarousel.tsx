@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Box, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import type { HomePageEvent } from "../Common/interface";
+import type { HomePageEvent } from "../types";
 import EventCard from "./EventCard";
 import SkeletonCard from "./SkeletonCard";
 

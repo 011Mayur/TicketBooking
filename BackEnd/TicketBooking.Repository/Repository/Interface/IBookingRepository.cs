@@ -5,7 +5,6 @@ namespace TicketBooking.Repository.Repository.Interface
 {
     public interface IBookingRepository
     {
-        Task<BookingCreationResult> CreateBookingAsync(BookingCreateDto dto);
         Task<BookingResponseDto?> GetBookingByIdAsync(int id);
 
         Task UpdateBookingPaymentAsync(
@@ -45,5 +44,14 @@ namespace TicketBooking.Repository.Repository.Interface
         );
 
         Task<BookingWithLockDto?> GetBookingWithLockAsync(int bookingId, int userId);
+
+        /// <summary>
+        /// Atomically creates a booking and marks the coupon as used in a single transaction.
+        /// Prevents a coupon from being reused if a crash occurs between the two operations.
+        /// </summary>
+        Task<BookingCreationResult> CreateBookingAndMarkCouponAsync(
+            BookingCreateDto dto,
+            BookingStatus status
+        );
     }
 }

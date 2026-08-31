@@ -6,8 +6,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
-import { APP_ROUTES } from "../Constant/appRoutes";
-import { useAuth } from "../Hooks/useAuth";
+import { APP_ROUTES } from "../constants/appRoutes";
+import { useAuth } from "../hooks/auth/useAuth";
 import { toast } from "react-toastify";
 
 const settings = ["My Bookings", "Logout"];

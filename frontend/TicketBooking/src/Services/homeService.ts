@@ -1,12 +1,11 @@
-
-import { API_ROUTES } from "../Constant/apiRoutes";
+import { API_ROUTES } from "../constants/apiRoutes";
 import type {
   ApiResponse,
   EventTypeDetail,
   HomePageEvent,
   PaginatedResponse,
-} from "../Common/interface";
-import api from "../Api/axios";
+} from "../types";
+import api from "../api/axios";
 
 export const homeService = {
   getEvents: async (page: number, typeId: number | null) => {

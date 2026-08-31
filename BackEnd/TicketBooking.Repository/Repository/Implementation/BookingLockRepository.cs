@@ -254,5 +254,21 @@ namespace TicketBooking.Repository.Repository.Implementation
                 ? Convert.ToInt32(totalQuantityParam.Value)
                 : 0;
         }
+
+        public async Task DeleteExistingLockForUserAsync(int userId, int eventId)
+        {
+            await using MySqlConnection connection = new(ConnectionString);
+            await connection.OpenAsync();
+
+            await using MySqlCommand command = new(
+                "DELETE FROM booking_locks WHERE user_id = @p_user_id AND event_id = @p_event_id",
+                connection
+            );
+            command.CommandType = CommandType.Text;
+            command.Parameters.AddWithValue("@p_user_id", userId);
+            command.Parameters.AddWithValue("@p_event_id", eventId);
+
+            await command.ExecuteNonQueryAsync();
+        }
     }
 }

@@ -12,10 +12,10 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
-import { APP_ROUTES } from "../../Constant/appRoutes";
+import { APP_ROUTES } from "../../constants/appRoutes";
 import BookingCard from "./BookingCard";
 import type { BookingCategory } from "../../utils/bookingUtils";
-import { useMyBookings } from "../../Hooks/useMyBookings";
+import { useMyBookings } from "../../hooks/booking/useMyBookings";
 
 type TabKey = "all" | BookingCategory;
 

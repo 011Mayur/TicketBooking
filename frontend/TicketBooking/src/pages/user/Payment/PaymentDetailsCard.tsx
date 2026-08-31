@@ -17,7 +17,7 @@ import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { formatEventDateTime } from "../../../utils/dateUtils";
-import type { BookingResponse, EventResponse } from "../../../Common/interface";
+import type { BookingResponse, EventResponse } from "../../../types";
 
 interface Props {
   booking: BookingResponse;
