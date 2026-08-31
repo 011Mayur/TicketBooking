@@ -1,5 +1,5 @@
 import { Box, Chip } from "@mui/material";
-import type { EventType } from "../Common/interface";
+import type { EventType } from "../types";
 
 interface TypeFilterChipsProps {
   types: EventType[];

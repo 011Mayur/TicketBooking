@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import { APP_ROUTES } from "./Constant/appRoutes";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Profile from "./pages/Profile";
+import Register from "./pages/auth/Register";
+import Login from "./pages/auth/Login";
+import { APP_ROUTES } from "./constants/appRoutes";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import Profile from "./pages/auth/Profile";
 import EventList from "./pages/admin/EventList";
 import CouponList from "./pages/admin/CouponList";
 import CouponForm from "./pages/admin/CouponForm";
@@ -41,10 +41,13 @@ function App() {
               element={<EventTypeManagement />}
             />
             <Route path={APP_ROUTES.PROFILE} element={<Profile />} />
-            <Route path="/admin/events" element={<EventList />} />
-            <Route path="/admin/coupons" element={<CouponList />} />
-            <Route path="/admin/coupons/new" element={<CouponForm />} />
-            <Route path="/admin/coupons/:id/edit" element={<CouponForm />} />
+            <Route path={APP_ROUTES.ADMIN_EVENTS} element={<EventList />} />
+            <Route path={APP_ROUTES.ADMIN_COUPONS} element={<CouponList />} />
+            <Route path={APP_ROUTES.CREATE_COUPON} element={<CouponForm />} />
+            <Route
+              path={APP_ROUTES.EDIT_COUPON(":id")}
+              element={<CouponForm />}
+            />
           </Route>
 
           {/* User Routes */}

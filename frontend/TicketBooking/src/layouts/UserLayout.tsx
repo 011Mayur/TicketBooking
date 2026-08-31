@@ -6,9 +6,10 @@ import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
 import { Outlet } from "react-router-dom";
-import { useAuth } from "../Hooks/useAuth";
-import UserAvatarMenu from "../Components/UserAvatarMenu";
-import AuthButtons from "../Components/AuthButtons";
+import { useAuth } from "../hooks/auth/useAuth";
+import UserAvatarMenu from "../components/UserAvatarMenu";
+import AuthButtons from "../components/AuthButtons";
+import { APP_ROUTES } from "../constants/appRoutes";
 
 function UserLayout() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -31,7 +32,7 @@ function UserLayout() {
               variant="h6"
               noWrap
               component="a"
-              href="/"
+              href={APP_ROUTES.HOME}
               sx={{
                 display: { xs: "none", md: "flex" },
                 fontFamily: "monospace",

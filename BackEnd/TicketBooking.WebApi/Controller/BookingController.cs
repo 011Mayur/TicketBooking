@@ -40,15 +40,15 @@ namespace TicketBooking.WebApi.Controller
         [ProducesResponseType(typeof(ApiResponse<CouponValidationDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ApplyCoupon([FromBody] ApplyCouponRequest request)
         {
-            int? userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            if (userId == null)
+            string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim is null)
                 return Unauthorized();
+            int userId = int.Parse(userIdClaim);
 
             CouponValidationDto result = await _couponService.ValidateCouponAsync(
                 request.Code,
                 request.EventId,
-                userId.Value
+                userId
             );
 
             return Success(result, ApiMessage.CouponApplied);
@@ -60,14 +60,14 @@ namespace TicketBooking.WebApi.Controller
         [ProducesResponseType(typeof(ApiResponse<EventDiscountCouponDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetCoupons(int id)
         {
-            int? userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            if (userId == null)
+            string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim is null)
                 return Unauthorized();
+            int userId = int.Parse(userIdClaim);
 
             List<EventDiscountCouponDto> result = await _bookingService.GetEventCouponsAsync(
                 id,
-                userId.Value
+                userId
             );
 
             return Success(result, ApiMessage.CouponFetched);

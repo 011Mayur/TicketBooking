@@ -18,18 +18,16 @@ import {
 } from "@mui/material";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { APP_ROUTES } from "../../Constant/appRoutes";
-import { useAuth } from "../../Hooks/useAuth";
-import { useEventDetail } from "../../Hooks/useEventDetail";
-import { useCheckout } from "../../Hooks/useCheckout";
-import { useCoupons } from "../../Hooks/useCoupons";
-import {
-  validateCoupon,
-  validateCheckout,
-} from "../../Services/checkoutService";
-import CouponOfferCard from "../../Components/Checkout/CouponOfferCard";
-
-import CouponListModal from "../../Components/Checkout/CouponListModal";
+import { APP_ROUTES } from "../../constants/appRoutes";
+import { useAuth } from "../../hooks/auth/useAuth";
+import { useEventDetail } from "../../hooks/event/useEventDetail";
+import { useCheckout } from "../../hooks/checkout/useCheckout";
+import { useCoupons } from "../../hooks/checkout/useCoupons";
+import { validateCoupon } from "../../services/couponService";
+import { validateCheckout } from "../../services/bookingService";
+import CouponOfferCard from "../../components/Checkout/CouponOfferCard";
+import CouponListModal from "../../components/Checkout/CouponListModal";
+import PriceRow from "../../components/Checkout/PriceRow";
 
 const Checkout = () => {
   const { isAuthenticated } = useAuth();
@@ -90,13 +88,11 @@ const Checkout = () => {
   };
 
   const handleProceedToPayment = async () => {
-    // Guard 1: Must be authenticated
     if (!isAuthenticated) {
       setLoginDialogOpen(true);
       return;
     }
 
-    // Guard 2: Event must be loaded
     if (!event) {
       setCheckoutError("Event data not loaded");
       return;
@@ -106,7 +102,6 @@ const Checkout = () => {
     setCheckoutError(null);
 
     try {
-      // Validate checkout data with backend
       const isValid = await validateCheckout({
         eventId: event.id,
         quantity,
@@ -115,14 +110,12 @@ const Checkout = () => {
       });
 
       if (isValid) {
-        // ✅ IMPORTANT: Pass checkoutData to payment page
         navigate(APP_ROUTES.PAYMENT(event.id), {
           state: {
             checkoutData: {
               eventId: event.id,
               quantity,
               unitPrice: event.ticketPrice,
-
               discountType: checkout.checkoutState.discountType,
               couponCode: checkout.couponData?.code || null,
             },
@@ -151,7 +144,7 @@ const Checkout = () => {
   };
 
   // ========================================
-  // LOADING STATE
+  // LOADING / ERROR STATES
   // ========================================
   if (loading) {
     return (
@@ -161,9 +154,6 @@ const Checkout = () => {
     );
   }
 
-  // ========================================
-  // ERROR STATE
-  // ========================================
   if (error || !event) {
     return (
       <Container maxWidth="md" sx={{ py: 3 }}>
@@ -237,10 +227,7 @@ const Checkout = () => {
                   >
                     {event.title}
                   </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "text.secondary" }}
-                  >
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
                     {event.venue}
                   </Typography>
                   <Typography
@@ -442,20 +429,20 @@ const Checkout = () => {
                 Price breakdown
               </Typography>
 
-              <Row
+              <PriceRow
                 label={`${quantity} ticket${quantity > 1 ? "s" : ""}`}
                 value={`₹${pricing.subTotal.toFixed(2)}`}
               />
 
               {hasCouponDiscount && (
-                <Row
+                <PriceRow
                   label={`Coupon (${checkout.couponData?.code})`}
                   value={`-₹${pricing.couponDiscountAmount!.toFixed(2)}`}
                   color="success.main"
                 />
               )}
               {hasBulkDiscount && (
-                <Row
+                <PriceRow
                   label={`Bulk discount (${pricing.bulkDiscountPercentage}%)`}
                   value={`-₹${pricing.bulkDiscountAmount!.toFixed(2)}`}
                   color="success.main"
@@ -556,27 +543,5 @@ const Checkout = () => {
     </Container>
   );
 };
-
-const Row = ({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color?: string;
-}) => (
-  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.75 }}>
-    <Typography variant="body2" sx={{ color: color || "text.primary" }}>
-      {label}
-    </Typography>
-    <Typography
-      variant="body2"
-      sx={{ color: color || "text.primary", fontWeight: color ? 600 : 400 }}
-    >
-      {value}
-    </Typography>
-  </Box>
-);
 
 export default Checkout;

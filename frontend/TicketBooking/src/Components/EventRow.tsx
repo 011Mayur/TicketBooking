@@ -1,8 +1,8 @@
 
 import { Box, Typography, useTheme } from "@mui/material";
-import { useTypeEventRow } from "../Hooks/useTypeEventRow";
+import { useTypeEventRow } from "../hooks/event/useTypeEventRow";
 import EventCarousel from "./EventCarousel";
-import type { EventType } from "../Common/interface";
+import type { EventType } from "../types";
 
 interface EventRowProps {
   type: EventType;

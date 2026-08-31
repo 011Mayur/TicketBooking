@@ -9,8 +9,8 @@ import {
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import PlaceIcon from "@mui/icons-material/Place";
 import { useNavigate } from "react-router-dom";
-import { APP_ROUTES } from "../../Constant/appRoutes";
-import type { BookingSummaryResponse } from "../../Common/interface";
+import { APP_ROUTES } from "../../constants/appRoutes";
+import type { BookingSummaryResponse } from "../../types";
 import BookingStatusChip from "./BookingStatusChip";
 import { classifyBooking } from "../../utils/bookingUtils";
 import { formatEventDateTime } from "../../utils/dateUtils";

@@ -121,6 +121,10 @@ namespace TicketBooking.Service.Service.Implementation
                 Order order = client.Order.Create(orderOptions);
                 string razorpayOrderId = order["id"].ToString();
 
+                // ✅ Delete any stale lock for this user+event before creating a fresh one
+                // Prevents duplicate locks when user refreshes/re-enters payment page
+                await _bookingLockRepo.DeleteExistingLockForUserAsync(userId, bookingData.EventId);
+
                 // ✅ Lock only — no booking row, no seat decrement here
                 await _bookingLockRepo.CreateBookingLockAsync(
                     eventId: bookingData.EventId,
@@ -256,7 +260,8 @@ namespace TicketBooking.Service.Service.Implementation
                     DiscountType = Enum.Parse<BookingDiscountType>(bookingLock.DiscountType),
                 };
 
-                var bookingResult = await _bookingRepo.CreateBookingAsync(
+                // Atomically create booking and mark coupon used in one transaction
+                var bookingResult = await _bookingRepo.CreateBookingAndMarkCouponAsync(
                     bookingDto,
                     BookingStatus.Paid
                 );
@@ -283,9 +288,6 @@ namespace TicketBooking.Service.Service.Implementation
                     request.RazorpayPaymentId,
                     BookingStatus.Paid
                 );
-
-                if (bookingLock.CouponId.HasValue)
-                    await _bookingRepo.MarkCouponUsed(newBookingId);
 
                 await _bookingLockRepo.DeleteLockAsync(request.RazorpayOrderId);
 

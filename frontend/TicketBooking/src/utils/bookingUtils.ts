@@ -1,4 +1,4 @@
-import type { BookingSummaryResponse } from "../Common/interface";
+import type { BookingSummaryResponse } from "../types";
 
 export type BookingCategory = "upcoming" | "past" | "pending" | "failed";
 

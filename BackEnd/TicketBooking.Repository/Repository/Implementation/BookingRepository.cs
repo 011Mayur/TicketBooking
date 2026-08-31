@@ -15,75 +15,6 @@ namespace TicketBooking.Repository.Repository.Implementation
             _config["ConnectionStrings:DefaultConnection"]
             ?? throw new InvalidOperationException("Connection string not found.");
 
-        public async Task<BookingCreationResult> CreateBookingAsync(BookingCreateDto dto)
-        {
-            await using MySqlConnection connection = new(ConnectionString);
-            await connection.OpenAsync();
-
-            await using MySqlCommand command = new("create_booking", connection);
-            command.CommandType = CommandType.StoredProcedure;
-
-            MySqlParameter outputId = new()
-            {
-                ParameterName = "@p_new_id",
-                MySqlDbType = MySqlDbType.Int32,
-                Direction = ParameterDirection.Output,
-            };
-            MySqlParameter seatsReserved = new()
-            {
-                ParameterName = "@p_seats_reserved",
-                MySqlDbType = MySqlDbType.Byte,
-                Direction = ParameterDirection.Output,
-            };
-            MySqlParameter couponReserved = new()
-            {
-                ParameterName = "@p_coupon_reserved",
-                MySqlDbType = MySqlDbType.Byte,
-                Direction = ParameterDirection.Output,
-            };
-
-            MySqlParameter[] parameters =
-            [
-                new("@p_user_id", dto.UserId),
-                new("@p_event_id", dto.EventId),
-                new("@p_quantity", dto.Quantity),
-                new("@p_unit_price", dto.UnitPrice),
-                new("@p_sub_total", dto.SubTotal),
-                new(
-                    "@p_bulk_discount_percentage",
-                    (object?)dto.BulkDiscountPercentage ?? DBNull.Value
-                ),
-                new("@p_bulk_discount_amount", (object?)dto.BulkDiscountAmount ?? DBNull.Value),
-                new("@p_coupon_id", (object?)dto.CouponId ?? DBNull.Value),
-                new("@p_coupon_code", (object?)dto.CouponCode ?? DBNull.Value),
-                new(
-                    "@p_coupon_discount_percentage",
-                    (object?)dto.CouponDiscountPercentage ?? DBNull.Value
-                ),
-                new("@p_coupon_discount_amount", (object?)dto.CouponDiscountAmount ?? DBNull.Value),
-                new("@p_final_amount", dto.FinalAmount),
-                new("@p_status", BookingStatus.Pending.ToString()),
-                new("@p_expires_at", dto.ExpiresAt),
-                new("@p_created_at", DateTime.UtcNow),
-                new("@p_discount_type", dto.DiscountType.ToString()),
-                outputId,
-                seatsReserved,
-                couponReserved,
-            ];
-
-            command.Parameters.AddRange(parameters);
-            await command.ExecuteNonQueryAsync();
-
-            bool seatsOk = Convert.ToBoolean(seatsReserved.Value);
-            bool couponOk = Convert.ToBoolean(couponReserved.Value);
-
-            return new BookingCreationResult
-            {
-                BookingId = seatsOk && couponOk ? Convert.ToInt32(outputId.Value) : null,
-                SeatsAvailable = seatsOk,
-                CouponAvailable = couponOk,
-            };
-        }
 
         public async Task<BookingResponseDto?> GetBookingByIdAsync(int id)
         {
@@ -466,7 +397,7 @@ namespace TicketBooking.Repository.Repository.Implementation
             };
 
             command.Parameters.AddWithValue("p_BookingId", bookingId);
-            command.Parameters.AddWithValue("p_Status", status);
+            command.Parameters.AddWithValue("p_Status", status.ToString());
 
             await connection.OpenAsync();
             await command.ExecuteNonQueryAsync();
@@ -565,6 +496,107 @@ namespace TicketBooking.Repository.Repository.Implementation
                 SeatsAvailable = seatsOk,
                 CouponAvailable = couponOk,
             };
+        }
+
+        /// <summary>
+        /// Atomically creates a booking and marks the coupon as used in a single transaction.
+        /// Prevents coupon double-use if a crash occurs between the two operations.
+        /// </summary>
+        public async Task<BookingCreationResult> CreateBookingAndMarkCouponAsync(
+            BookingCreateDto dto,
+            BookingStatus status
+        )
+        {
+            await using MySqlConnection connection = new(ConnectionString);
+            await connection.OpenAsync();
+
+            await using MySqlTransaction transaction = await connection.BeginTransactionAsync();
+
+            try
+            {
+                // Step 1: Create booking
+                await using MySqlCommand bookingCommand = new("create_booking", connection, transaction);
+                bookingCommand.CommandType = CommandType.StoredProcedure;
+
+                MySqlParameter outputId = new()
+                {
+                    ParameterName = "@p_new_id",
+                    MySqlDbType = MySqlDbType.Int32,
+                    Direction = ParameterDirection.Output,
+                };
+                MySqlParameter seatsReserved = new()
+                {
+                    ParameterName = "@p_seats_reserved",
+                    MySqlDbType = MySqlDbType.Byte,
+                    Direction = ParameterDirection.Output,
+                };
+                MySqlParameter couponReserved = new()
+                {
+                    ParameterName = "@p_coupon_reserved",
+                    MySqlDbType = MySqlDbType.Byte,
+                    Direction = ParameterDirection.Output,
+                };
+
+                MySqlParameter[] bookingParams =
+                [
+                    new("@p_user_id", dto.UserId),
+                    new("@p_event_id", dto.EventId),
+                    new("@p_quantity", dto.Quantity),
+                    new("@p_unit_price", dto.UnitPrice),
+                    new("@p_sub_total", dto.SubTotal),
+                    new(
+                        "@p_bulk_discount_percentage",
+                        (object?)dto.BulkDiscountPercentage ?? DBNull.Value
+                    ),
+                    new("@p_bulk_discount_amount", (object?)dto.BulkDiscountAmount ?? DBNull.Value),
+                    new("@p_coupon_id", (object?)dto.CouponId ?? DBNull.Value),
+                    new("@p_coupon_code", (object?)dto.CouponCode ?? DBNull.Value),
+                    new(
+                        "@p_coupon_discount_percentage",
+                        (object?)dto.CouponDiscountPercentage ?? DBNull.Value
+                    ),
+                    new("@p_coupon_discount_amount", (object?)dto.CouponDiscountAmount ?? DBNull.Value),
+                    new("@p_final_amount", dto.FinalAmount),
+                    new("@p_status", status.ToString()),
+                    new("@p_expires_at", dto.ExpiresAt),
+                    new("@p_created_at", DateTime.UtcNow),
+                    new("@p_discount_type", dto.DiscountType.ToString()),
+                    outputId,
+                    seatsReserved,
+                    couponReserved,
+                ];
+
+                bookingCommand.Parameters.AddRange(bookingParams);
+                await bookingCommand.ExecuteNonQueryAsync();
+
+                bool seatsOk = Convert.ToBoolean(seatsReserved.Value);
+                bool couponOk = Convert.ToBoolean(couponReserved.Value);
+                int? newBookingId = seatsOk && couponOk ? Convert.ToInt32(outputId.Value) : null;
+
+                // Step 2: If booking succeeded and coupon was used, mark it — within same transaction
+                if (newBookingId.HasValue && dto.CouponId.HasValue)
+                {
+                    await using MySqlCommand couponCommand = new("mark_coupon_used", connection, transaction);
+                    couponCommand.CommandType = CommandType.StoredProcedure;
+                    couponCommand.Parameters.AddWithValue("@p_booking_id", newBookingId.Value);
+                    couponCommand.Parameters.AddWithValue("@p_used_at", DateTime.UtcNow);
+                    await couponCommand.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+
+                return new BookingCreationResult
+                {
+                    BookingId = newBookingId,
+                    SeatsAvailable = seatsOk,
+                    CouponAvailable = couponOk,
+                };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<BookingWithLockDto?> GetBookingWithLockAsync(int bookingId, int userId)

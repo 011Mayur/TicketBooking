@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -12,11 +12,6 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
   CircularProgress,
   Tooltip,
   useTheme,
@@ -29,57 +24,55 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import ManageIcon from "@mui/icons-material/Settings";
-import { toast } from "react-toastify";
-import { AxiosError } from "axios";
-import type {
-  ApiErrorResponse,
-  ApiResponse,
-  EventCategory,
-  EventTypeDetail,
-  PastEvent,
-} from "../../Common/interface";
-import api from "../../Api/axios";
-import { API_ROUTES } from "../../Constant/apiRoutes";
-import ConfirmDialog from "../Shared/ConfirmDialog";
 
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof AxiosError) {
-    return (
-      error.response?.data?.message || error.message || "An error occurred"
-    );
-  }
-  return "An unexpected error occurred";
-};
+import type { EventCategory, EventTypeDetail } from "../../types";
+import ConfirmDialog from "../shared/ConfirmDialog";
+import { useEventTypeManagement } from "../../hooks/admin/useEventTypeManagement";
+import EventTypeFormDialog from "../../components/admin/EventTypeFormDialog";
+import ManageCategoriesDialog from "../../components/admin/ManageCategoriesDialog";
+import CategoryFormDialog from "../../components/admin/CategoryFormDialog";
+import PastEventsDialog from "../../components/admin/PastEventsDialog";
 
 const EventTypeManagement = () => {
   const theme = useTheme();
 
-  const [eventTypes, setEventTypes] = useState<EventTypeDetail[]>([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    eventTypes,
+    loading,
+    categories,
+    categoriesLoading,
+    pastEvents,
+    pastEventsLoading,
+    deleteLoading,
+    typeModalLoading,
+    categoryModalLoading,
+    fetchCategories,
+    fetchPastEvents,
+    saveType,
+    saveCategory,
+    confirmDelete,
+  } = useEventTypeManagement();
 
+  // ── Context menu ──
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedType, setSelectedType] = useState<EventTypeDetail | null>(
-    null,
-  );
+  const [selectedType, setSelectedType] = useState<EventTypeDetail | null>(null);
 
+  // ── Event Type modal ──
   const [typeModalOpen, setTypeModalOpen] = useState(false);
   const [editingTypeId, setEditingTypeId] = useState<number | null>(null);
   const [typeName, setTypeName] = useState("");
-  const [typeModalLoading, setTypeModalLoading] = useState(false);
 
+  // ── Manage Categories dialog ──
   const [manageCategoriesOpen, setManageCategoriesOpen] = useState(false);
   const [selectedTypeForCategories, setSelectedTypeForCategories] =
     useState<EventTypeDetail | null>(null);
-  const [categories, setCategories] = useState<EventCategory[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
+  // ── Category modal ──
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(
-    null,
-  );
+  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
   const [categoryName, setCategoryName] = useState("");
-  const [categoryModalLoading, setCategoryModalLoading] = useState(false);
 
+  // ── Delete confirm ──
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteConfirmData, setDeleteConfirmData] = useState<{
     type: "type" | "category";
@@ -87,77 +80,13 @@ const EventTypeManagement = () => {
     name: string;
     reason?: string;
   } | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // ── Past events dialog ──
   const [pastEventsOpen, setPastEventsOpen] = useState(false);
   const [selectedCategoryForPastEvents, setSelectedCategoryForPastEvents] =
     useState<EventCategory | null>(null);
-  const [pastEvents, setPastEvents] = useState<PastEvent[]>([]);
-  const [pastEventsLoading, setPastEventsLoading] = useState(false);
 
-  const fetchEventTypes = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get<ApiResponse<EventTypeDetail[]>>(
-        API_ROUTES.EVENT_MANAGEMENT.TYPES,
-      );
-      setEventTypes(response.data.data);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCategories = async (typeId: number) => {
-    try {
-      setCategoriesLoading(true);
-      const response = await api.get<ApiResponse<EventCategory[]>>(
-        API_ROUTES.EVENT_MANAGEMENT.CATEGORIES_BY_TYPE_ID(typeId),
-      );
-      setCategories(response.data.data);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      console.error(error);
-    } finally {
-      setCategoriesLoading(false);
-    }
-  };
-
-  const fetchPastEvents = async (categoryId: number) => {
-    try {
-      setPastEventsLoading(true);
-      const response = await api.get<ApiResponse<PastEvent[]>>(
-        API_ROUTES.EVENT_MANAGEMENT.PAST_EVENT_BY_CATEGORY(categoryId),
-      );
-      setPastEvents(response.data.data);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      console.error(error);
-    } finally {
-      setPastEventsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const fetchEventTypes = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get<ApiResponse<EventTypeDetail[]>>(
-          API_ROUTES.EVENT_MANAGEMENT.TYPES,
-        );
-        setEventTypes(response.data.data);
-      } catch (error) {
-        toast.error(getErrorMessage(error));
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEventTypes();
-  }, []);
-
+  // ── Menu handlers ──
   const handleOpenMenu = (
     event: React.MouseEvent<HTMLElement>,
     type: EventTypeDetail,
@@ -171,6 +100,7 @@ const EventTypeManagement = () => {
     setSelectedType(null);
   };
 
+  // ── Type modal handlers ──
   const handleOpenTypeModal = (type?: EventTypeDetail) => {
     if (type) {
       setEditingTypeId(type.id);
@@ -189,36 +119,11 @@ const EventTypeManagement = () => {
   };
 
   const handleSaveType = async () => {
-    if (!typeName.trim()) {
-      toast.error("Type name cannot be empty");
-      return;
-    }
-
-    try {
-      setTypeModalLoading(true);
-      const payload = { name: typeName };
-
-      if (editingTypeId) {
-        await api.put(
-          API_ROUTES.EVENT_MANAGEMENT.TYPES_ID(editingTypeId),
-          payload,
-        );
-        toast.success("Event type updated successfully");
-      } else {
-        await api.post(API_ROUTES.EVENT_MANAGEMENT.TYPES, payload);
-        toast.success("Event type created successfully");
-      }
-
-      handleCloseTypeModal();
-      fetchEventTypes();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      console.error(error);
-    } finally {
-      setTypeModalLoading(false);
-    }
+    const ok = await saveType(typeName, editingTypeId);
+    if (ok) handleCloseTypeModal();
   };
 
+  // ── Manage Categories handlers ──
   const handleOpenManageCategories = (type: EventTypeDetail) => {
     setSelectedTypeForCategories(type);
     setManageCategoriesOpen(true);
@@ -229,9 +134,9 @@ const EventTypeManagement = () => {
   const handleCloseManageCategories = () => {
     setManageCategoriesOpen(false);
     setSelectedTypeForCategories(null);
-    setCategories([]);
   };
 
+  // ── Category modal handlers ──
   const handleOpenCategoryModal = (category?: EventCategory) => {
     if (category) {
       setEditingCategoryId(category.id);
@@ -250,42 +155,16 @@ const EventTypeManagement = () => {
   };
 
   const handleSaveCategory = async () => {
-    if (!categoryName.trim()) {
-      toast.error("Category name cannot be empty");
-      return;
-    }
-
     if (!selectedTypeForCategories) return;
-
-    try {
-      setCategoryModalLoading(true);
-      const payload = {
-        name: categoryName,
-        eventTypeId: selectedTypeForCategories.id,
-      };
-
-      if (editingCategoryId) {
-        await api.put(
-          API_ROUTES.EVENT_MANAGEMENT.CATEGORIES_ID(editingCategoryId),
-          payload,
-        );
-        toast.success("Category updated successfully");
-      } else {
-        await api.post(API_ROUTES.EVENT_MANAGEMENT.CATEGORIES, payload);
-        toast.success("Category created successfully");
-        fetchEventTypes();
-      }
-
-      handleCloseCategoryModal();
-      fetchCategories(selectedTypeForCategories.id);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      console.error(error);
-    } finally {
-      setCategoryModalLoading(false);
-    }
+    const ok = await saveCategory(
+      categoryName,
+      selectedTypeForCategories.id,
+      editingCategoryId,
+    );
+    if (ok) handleCloseCategoryModal();
   };
 
+  // ── Delete handlers ──
   const handleDeleteType = (type: EventTypeDetail) => {
     setDeleteConfirmData({
       type: "type",
@@ -309,49 +188,14 @@ const EventTypeManagement = () => {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirmData) return;
-
-    try {
-      setDeleteLoading(true);
-      const endpoint =
-        deleteConfirmData.type === "type"
-          ? API_ROUTES.EVENT_MANAGEMENT.TYPES_ID(deleteConfirmData.id)
-          : API_ROUTES.EVENT_MANAGEMENT.CATEGORIES_ID(deleteConfirmData.id);
-
-      const response = await api.delete<ApiResponse<null>>(endpoint);
-
-      toast.success(response.data.message);
+    const ok = await confirmDelete(deleteConfirmData, selectedTypeForCategories);
+    if (ok) {
       setDeleteConfirmOpen(false);
       setDeleteConfirmData(null);
-
-      if (deleteConfirmData.type === "type") {
-        fetchEventTypes();
-      } else if (selectedTypeForCategories) {
-        fetchCategories(selectedTypeForCategories.id);
-        fetchEventTypes();
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const errorCode = axiosError.response?.data?.errorCode;
-      const errorMsg = getErrorMessage(error);
-
-      if (
-        errorCode === "ACTIVE_EVENTS_EXIST" ||
-        errorCode === "CATEGORIES_EXIST"
-      ) {
-        toast.error(`${errorMsg} - Page state has changed. Refreshing...`);
-        if (selectedTypeForCategories) {
-          fetchCategories(selectedTypeForCategories.id);
-        }
-      } else {
-        toast.error(errorMsg);
-      }
-
-      console.error(error);
-    } finally {
-      setDeleteLoading(false);
     }
   };
 
+  // ── Past events handlers ──
   const handleViewPastEvents = async (category: EventCategory) => {
     setSelectedCategoryForPastEvents(category);
     setPastEventsOpen(true);
@@ -361,7 +205,6 @@ const EventTypeManagement = () => {
   const handleClosePastEvents = () => {
     setPastEventsOpen(false);
     setSelectedCategoryForPastEvents(null);
-    setPastEvents([]);
   };
 
   return (
@@ -444,6 +287,7 @@ const EventTypeManagement = () => {
         </TableContainer>
       )}
 
+      {/* Context Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -477,181 +321,38 @@ const EventTypeManagement = () => {
         )}
       </Menu>
 
-      <Dialog
+      {/* Extracted dialogs */}
+      <EventTypeFormDialog
         open={typeModalOpen}
+        editingTypeId={editingTypeId}
+        typeName={typeName}
+        loading={typeModalLoading}
+        onNameChange={setTypeName}
         onClose={handleCloseTypeModal}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>
-          {editingTypeId ? "Edit Event Type" : "Create Event Type"}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Type Name"
-            margin="dense"
-            value={typeName}
-            onChange={(e) => setTypeName(e.target.value)}
-            placeholder="e.g., Concert, Theater, Sports"
-            disabled={typeModalLoading}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseTypeModal} disabled={typeModalLoading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSaveType}
-            variant="contained"
-            disabled={typeModalLoading || !typeName.trim()}
-          >
-            {typeModalLoading ? <CircularProgress size={24} /> : "Save"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onSave={handleSaveType}
+      />
 
-      <Dialog
+      <ManageCategoriesDialog
         open={manageCategoriesOpen}
+        selectedType={selectedTypeForCategories}
+        categories={categories}
+        categoriesLoading={categoriesLoading}
         onClose={handleCloseManageCategories}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          Manage Categories: {selectedTypeForCategories?.name}
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          {categoriesLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <>
-              {categories.length === 0 ? (
-                <Typography color="textSecondary" align="center" sx={{ py: 2 }}>
-                  No categories yet
-                </Typography>
-              ) : (
-                <Box sx={{ maxHeight: "400px", overflowY: "auto" }}>
-                  {categories.map((category) => (
-                    <Box
-                      key={category.id}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        p: 1.5,
-                        mb: 1,
-                        bgcolor: theme.palette.grey[50],
-                        borderRadius: 1,
-                      }}
-                    >
-                      <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontWeight: 500 }}>
-                          {category.name}
-                        </Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          {category.activeEventCount} active ·{" "}
-                          {category.pastEventCount} past events
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", gap: 0.5 }}>
-                        <Tooltip title="Edit">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenCategoryModal(category)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+        onAddCategory={() => handleOpenCategoryModal()}
+        onEditCategory={handleOpenCategoryModal}
+        onDeleteCategory={handleDeleteCategory}
+        onViewPastEvents={handleViewPastEvents}
+      />
 
-                        {category.pastEventCount > 0 && (
-                          <Tooltip title="View past events">
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={() => handleViewPastEvents(category)}
-                            >
-                              {category.pastEventCount} Past
-                            </Button>
-                          </Tooltip>
-                        )}
-
-                        {category.canDelete ? (
-                          <Tooltip title="Delete">
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteCategory(category)}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        ) : (
-                          <Tooltip title={category.deletionReason}>
-                            <span>
-                              <IconButton size="small" disabled>
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                        )}
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => handleOpenCategoryModal()}
-            variant="contained"
-            startIcon={<AddIcon />}
-          >
-            Add Category
-          </Button>
-          <Button onClick={handleCloseManageCategories}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
+      <CategoryFormDialog
         open={categoryModalOpen}
+        editingCategoryId={editingCategoryId}
+        categoryName={categoryName}
+        loading={categoryModalLoading}
+        onNameChange={setCategoryName}
         onClose={handleCloseCategoryModal}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>
-          {editingCategoryId ? "Edit Category" : "Create Category"}
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <TextField
-            fullWidth
-            label="Category Name"
-            margin="dense"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
-            placeholder="e.g., Live Performance, Theater Show"
-            disabled={categoryModalLoading}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseCategoryModal}
-            disabled={categoryModalLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSaveCategory}
-            variant="contained"
-            disabled={categoryModalLoading || !categoryName.trim()}
-          >
-            {categoryModalLoading ? <CircularProgress size={24} /> : "Save"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onSave={handleSaveCategory}
+      />
 
       <ConfirmDialog
         open={deleteConfirmOpen}
@@ -667,65 +368,14 @@ const EventTypeManagement = () => {
         abortButton="Cancel"
         confirmButton="Delete"
       />
-      <Dialog
+
+      <PastEventsDialog
         open={pastEventsOpen}
+        selectedCategory={selectedCategoryForPastEvents}
+        pastEvents={pastEvents}
+        loading={pastEventsLoading}
         onClose={handleClosePastEvents}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          Past Events: {selectedCategoryForPastEvents?.name}
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          {pastEventsLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : pastEvents.length === 0 ? (
-            <Typography color="textSecondary" align="center" sx={{ py: 2 }}>
-              No past events
-            </Typography>
-          ) : (
-            <TableContainer>
-              <Table size="small">
-                <TableHead sx={{ bgcolor: theme.palette.grey[100] }}>
-                  <TableRow>
-                    <TableCell>Title</TableCell>
-                    <TableCell>Artist</TableCell>
-                    <TableCell>Date</TableCell>
-                    <TableCell align="center">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {pastEvents.map((event) => (
-                    <TableRow key={event.id}>
-                      <TableCell>{event.title}</TableCell>
-                      <TableCell>{event.artistName}</TableCell>
-                      <TableCell>
-                        {new Date(event.eventDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell align="center">
-                        {event.isActive ? (
-                          <Chip label="Past" size="small" color="default" />
-                        ) : (
-                          <Chip
-                            label="Deleted"
-                            size="small"
-                            variant="outlined"
-                          />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClosePastEvents}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      />
     </Container>
   );
 };

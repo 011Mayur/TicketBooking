@@ -10,17 +10,17 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material";
-import { APP_ROUTES } from "../../Constant/appRoutes";
+import { APP_ROUTES } from "../../constants/appRoutes";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { loginSchema, type LoginFormValues } from "../../zodSchema/loginSchema";
 import { toast } from "react-toastify";
-import { MESSAGES } from "../../Constant/messages";
-import { userLogin } from "../../Services/authService";
+import { MESSAGES } from "../../constants/messages";
+import { userLogin } from "../../services/authService";
 import type { AxiosError } from "axios";
-import type { ApiErrorResponse } from "../../Common/interface";
+import type { ApiErrorResponse } from "../../types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useAuth } from "../../Hooks/useAuth";
+import { useAuth } from "../../hooks/auth/useAuth";
 
 const UserLogin = () => {
   const [showPassword, setShowPassword] = useState(false);

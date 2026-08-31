@@ -33,3 +33,6 @@ BEGIN
     SET p_new_id = LAST_INSERT_ID();
 END //
 DELIMITER ;
+
+select * from bookings
+select * from events

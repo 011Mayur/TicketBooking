@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -17,17 +17,16 @@ import {
   Avatar,
   IconButton,
   Stack,
-  Tooltip,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../../Api/axios";
+import api from "../../api/axios";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
   type ApiErrorResponse,
   type ApiResponse,
   type EventDetail,
-} from "../../Common/interface";
+} from "../../types";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Celebration from "@mui/icons-material/Celebration";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -37,9 +36,10 @@ import EventSeatIcon from "@mui/icons-material/EventSeat";
 import LockIcon from "@mui/icons-material/Lock";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import axios from "axios";
-import { API_ROUTES } from "../../Constant/apiRoutes";
-import { useAuth } from "../../Hooks/useAuth";
-import { APP_ROUTES } from "../../Constant/appRoutes";
+import { API_ROUTES } from "../../constants/apiRoutes";
+import { useAuth } from "../../hooks/auth/useAuth";
+import { APP_ROUTES } from "../../constants/appRoutes";
+import InfoChip from "../../components/user/InfoChip";
 
 const EventDetails = () => {
   const { isAuthenticated } = useAuth();
@@ -116,7 +116,6 @@ const EventDetails = () => {
       } catch (err) {
         if (axios.isAxiosError(err)) {
           const apiError = err.response?.data as ApiErrorResponse;
-
           setError(apiError.message);
         }
       } finally {
@@ -165,19 +164,20 @@ const EventDetails = () => {
 
   const handleLoginRedirect = () => {
     setLoginDialogOpen(false);
-    navigate("/user-login", { state: { returnUrl: `/events/${eventId}` } });
+    navigate(APP_ROUTES.USER_LOGIN, {
+      state: { returnUrl: APP_ROUTES.EVENT(eventId!) },
+    });
   };
 
   const timeFormat = (time: string) => {
     const [hours, minutes] = time.split(":").map(Number);
     const date = new Date();
     date.setHours(hours, minutes);
-    const formattedTime = date.toLocaleTimeString([], {
+    return date.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
     });
-    return formattedTime;
   };
 
   if (loading) {
@@ -203,7 +203,7 @@ const EventDetails = () => {
         </Alert>
         <Button
           variant="contained"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(APP_ROUTES.HOME)}
           sx={{ mt: 2 }}
         >
           Back to Events
@@ -212,91 +212,10 @@ const EventDetails = () => {
     );
   }
 
-  // Small reusable info chip used for Venue / Date / Seats row
-  const InfoChip = ({
-    icon,
-    label,
-    value,
-    valueColor,
-    tooltip = false,
-  }: {
-    icon: React.ReactNode;
-    label: string;
-    value: string; // narrowed from ReactNode — tooltip needs raw text to display
-    valueColor?: string;
-    tooltip?: boolean;
-  }) => {
-    const valueRef = useRef<HTMLElement>(null);
-    const [isOverflowing, setIsOverflowing] = useState(false);
-
-    const checkOverflow = () => {
-      const el = valueRef.current;
-      if (el) setIsOverflowing(el.scrollWidth > el.clientWidth);
-    };
-
-    const valueNode = (
-      <Typography
-        ref={valueRef}
-        variant="body2"
-        sx={{ fontWeight: 600, color: valueColor }}
-        noWrap
-        onMouseEnter={tooltip ? checkOverflow : undefined}
-      >
-        {value}
-      </Typography>
-    );
-
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 1.25,
-          flex: "1 1 140px",
-          minWidth: 0,
-          p: 1.5,
-          borderRadius: 2,
-          border: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <Box
-          sx={{
-            width: 34,
-            height: 34,
-            flexShrink: 0,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: `${theme.palette.primary.main}14`,
-            color: theme.palette.primary.main,
-          }}
-        >
-          {icon}
-        </Box>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            variant="caption"
-            sx={{ color: theme.palette.text.secondary, display: "block" }}
-          >
-            {label}
-          </Typography>
-          {tooltip ? (
-            <Tooltip title={value} arrow disableHoverListener={!isOverflowing}>
-              {valueNode}
-            </Tooltip>
-          ) : (
-            valueNode
-          )}
-        </Box>
-      </Box>
-    );
-  };
-
   return (
     <Container maxWidth="lg" sx={{ py: 4, pb: 6 }}>
       <Button
-        onClick={() => navigate("/")}
+        onClick={() => navigate(APP_ROUTES.HOME)}
         sx={{
           mb: 3,
           textTransform: "none",
@@ -389,6 +308,7 @@ const EventDetails = () => {
             />
           </Stack>
 
+          {/* Info chips — now a proper reusable component */}
           <Stack
             direction="row"
             spacing={1.5}
@@ -455,7 +375,7 @@ const EventDetails = () => {
             </Alert>
           )}
 
-          {/* Price + quantity stepper, merged into one row */}
+          {/* Price + quantity stepper */}
           <Card
             variant="outlined"
             sx={{
@@ -542,6 +462,7 @@ const EventDetails = () => {
             </Typography>
           </Card>
 
+          {/* Price breakdown */}
           <Card
             variant="outlined"
             sx={{ mb: 3, borderRadius: 2, bgcolor: "#FAFAFA" }}

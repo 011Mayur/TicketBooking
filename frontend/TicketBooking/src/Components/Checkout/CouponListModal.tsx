@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CouponOfferCard from "./CouponOfferCard";
-import type { CouponOffer } from "../../Common/interface";
+import type { CouponOffer } from "../../types";
 
 interface CouponListModalProps {
   open: boolean;

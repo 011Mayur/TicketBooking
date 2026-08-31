@@ -7,7 +7,7 @@ import {
   useTheme,
 } from "@mui/material";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import type { BookingResponse, EventResponse } from "../../../Common/interface";
+import type { BookingResponse, EventResponse } from "../../../types";
 
 const Row = ({
   label,

@@ -19,16 +19,16 @@ namespace TicketBooking.WebApi.Controller
             [FromBody] CreatePaymentOrderRequest request
         )
         {
-            int? userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            if (userId == null)
+            string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim is null)
                 return Unauthorized();
+            int userId = int.Parse(userIdClaim);
 
             try
             {
                 CreatePaymentOrderResponse response = await _paymentService.CreatePaymentOrderAsync(
                     request.BookingId,
-                    userId.Value,
+                    userId,
                     request.BookingData
                 );
 
@@ -43,14 +43,14 @@ namespace TicketBooking.WebApi.Controller
         [HttpPost("verify")]
         public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentRequest request)
         {
-            int? userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            if (userId == null)
+            string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim is null)
                 return Unauthorized();
+            int userId = int.Parse(userIdClaim);
 
             PaymentVerificationResponse response = await _paymentService.VerifyPaymentAsync(
                 request,
-                userId.Value
+                userId
             );
 
             if (!response.IsValid)
@@ -69,16 +69,16 @@ namespace TicketBooking.WebApi.Controller
         [HttpPost("release")]
         public async Task<IActionResult> ReleaseBooking([FromBody] ReleaseBookingRequest request)
         {
-            int? userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            if (userId == null)
+            string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim is null)
                 return Unauthorized();
+            int userId = int.Parse(userIdClaim);
 
             await _paymentService.ReleaseBookingAsync(
                 request.BookingId,
                 request.Status,
                 request.RazorpayPaymentId,
-                userId.Value
+                userId
             );
 
             return Success("Booking released successfully");

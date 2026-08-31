@@ -5,8 +5,8 @@ import App from "./App.tsx";
 import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
 import { ToastContainer } from "react-toastify";
-import { theme } from "./Theme/Theme.ts";
-import { AuthProvider } from "./Context/AuthProvider.tsx";
+import { theme } from "./theme/Theme.ts";
+import { AuthProvider } from "./context/AuthProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode >
