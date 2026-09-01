@@ -17,7 +17,7 @@ namespace TicketBooking.Repository.Repository.Implementation
         private readonly ILogger<EventRepository> _logger = logger;
         private string ConnectionString =>
             _config["ConnectionStrings:DefaultConnection"]
-            ?? throw new InvalidOperationException(ExceptionMessage.ConnectionStringNotFound);
+            ?? throw new InvalidOperationException("Connection string not found.");
 
         public async Task<int> CreateEventAsync(EventCreateDto dto)
         {
@@ -299,7 +299,6 @@ namespace TicketBooking.Repository.Repository.Implementation
         {
             List<HomePageEvent> events = [];
 
-            // If no search query, return empty or default results
             if (string.IsNullOrWhiteSpace(searchQuery))
                 return events;
 

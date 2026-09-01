@@ -25,7 +25,10 @@ namespace TicketBooking.Service.Service.Implementation
                 EnableSsl = true,
             };
 
-            using MailMessage message = new(from: from, to: toEmail, subject: subject, body: body);
+            using MailMessage message = new(from: from, to: toEmail, subject: subject, body: body)
+            {
+                IsBodyHtml = true
+            };
 
             await smtpClient.SendMailAsync(message);
         }

@@ -15,6 +15,7 @@ import { MESSAGES } from "../../constants/messages";
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const email = searchParams.get("email") ?? "";
   const navigate = useNavigate();
 
   const {
@@ -70,6 +71,21 @@ const ResetPassword = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {email && (
+              <TextField
+                label="Email"
+                type="email"
+                fullWidth
+                size="small"
+                value={email}
+                disabled
+                sx={{
+                  "& .MuiInputBase-input.Mui-disabled": {
+                    WebkitTextFillColor: "#333",
+                  },
+                }}
+              />
+            )}
             <TextField
               label="New Password"
               type="password"

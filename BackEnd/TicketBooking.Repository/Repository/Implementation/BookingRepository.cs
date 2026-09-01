@@ -13,8 +13,7 @@ namespace TicketBooking.Repository.Repository.Implementation
 
         private string ConnectionString =>
             _config["ConnectionStrings:DefaultConnection"]
-            ?? throw new InvalidOperationException(ExceptionMessage.ConnectionStringNotFound);
-
+            ?? throw new InvalidOperationException("Connection string not found.");
 
         public async Task<BookingResponseDto?> GetBookingByIdAsync(int id)
         {
@@ -408,7 +407,6 @@ namespace TicketBooking.Repository.Repository.Implementation
             await using MySqlConnection connection = new(ConnectionString);
             await connection.OpenAsync();
 
-            // Query to check available seats in events table
             await using MySqlCommand command = new(
                 "SELECT available_seats FROM events WHERE id = @event_id",
                 connection
@@ -498,10 +496,6 @@ namespace TicketBooking.Repository.Repository.Implementation
             };
         }
 
-        /// <summary>
-        /// Atomically creates a booking and marks the coupon as used in a single transaction.
-        /// Prevents coupon double-use if a crash occurs between the two operations.
-        /// </summary>
         public async Task<BookingCreationResult> CreateBookingAndMarkCouponAsync(
             BookingCreateDto dto,
             BookingStatus status
@@ -514,8 +508,11 @@ namespace TicketBooking.Repository.Repository.Implementation
 
             try
             {
-                // Step 1: Create booking
-                await using MySqlCommand bookingCommand = new("create_booking", connection, transaction);
+                await using MySqlCommand bookingCommand = new(
+                    "create_booking",
+                    connection,
+                    transaction
+                );
                 bookingCommand.CommandType = CommandType.StoredProcedure;
 
                 MySqlParameter outputId = new()
@@ -555,7 +552,10 @@ namespace TicketBooking.Repository.Repository.Implementation
                         "@p_coupon_discount_percentage",
                         (object?)dto.CouponDiscountPercentage ?? DBNull.Value
                     ),
-                    new("@p_coupon_discount_amount", (object?)dto.CouponDiscountAmount ?? DBNull.Value),
+                    new(
+                        "@p_coupon_discount_amount",
+                        (object?)dto.CouponDiscountAmount ?? DBNull.Value
+                    ),
                     new("@p_final_amount", dto.FinalAmount),
                     new("@p_status", status.ToString()),
                     new("@p_expires_at", dto.ExpiresAt),
@@ -573,10 +573,13 @@ namespace TicketBooking.Repository.Repository.Implementation
                 bool couponOk = Convert.ToBoolean(couponReserved.Value);
                 int? newBookingId = seatsOk && couponOk ? Convert.ToInt32(outputId.Value) : null;
 
-                // Step 2: If booking succeeded and coupon was used, mark it — within same transaction
                 if (newBookingId.HasValue && dto.CouponId.HasValue)
                 {
-                    await using MySqlCommand couponCommand = new("mark_coupon_used", connection, transaction);
+                    await using MySqlCommand couponCommand = new(
+                        "mark_coupon_used",
+                        connection,
+                        transaction
+                    );
                     couponCommand.CommandType = CommandType.StoredProcedure;
                     couponCommand.Parameters.AddWithValue("@p_booking_id", newBookingId.Value);
                     couponCommand.Parameters.AddWithValue("@p_used_at", DateTime.UtcNow);
@@ -604,7 +607,6 @@ namespace TicketBooking.Repository.Repository.Implementation
             await using MySqlConnection connection = new(ConnectionString);
             await connection.OpenAsync();
 
-            // First get booking
             await using MySqlCommand bookingCommand = new("get_booking_by_id", connection);
             bookingCommand.CommandType = CommandType.StoredProcedure;
             bookingCommand.Parameters.Add(new("@p_id", bookingId));
