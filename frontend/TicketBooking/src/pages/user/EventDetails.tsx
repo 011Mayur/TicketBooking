@@ -197,7 +197,7 @@ const EventDetails = () => {
 
   if (error || !event) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
         <Alert severity="error" sx={{ mb: 3 }}>
           {error || "Event not found"}
         </Alert>

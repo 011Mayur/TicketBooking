@@ -7,6 +7,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Profile from "./pages/auth/Profile";
 import EventList from "./pages/admin/EventList";
+import AdminEventDetail from "./pages/admin/AdminEventDetail";
 import CouponList from "./pages/admin/CouponList";
 import CouponForm from "./pages/admin/CouponForm";
 import Home from "./pages/user/Home";
@@ -42,6 +43,10 @@ function App() {
             />
             <Route path={APP_ROUTES.PROFILE} element={<Profile />} />
             <Route path={APP_ROUTES.ADMIN_EVENTS} element={<EventList />} />
+            <Route
+              path={APP_ROUTES.ADMIN_EVENT_DETAIL(":eventId")}
+              element={<AdminEventDetail />}
+            />
             <Route path={APP_ROUTES.ADMIN_COUPONS} element={<CouponList />} />
             <Route path={APP_ROUTES.CREATE_COUPON} element={<CouponForm />} />
             <Route

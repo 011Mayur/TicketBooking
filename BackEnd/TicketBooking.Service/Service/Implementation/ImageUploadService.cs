@@ -63,7 +63,7 @@ namespace TicketBooking.Service.Service.Implementation
         {
             if (string.IsNullOrWhiteSpace(imageUrl))
             {
-                throw new ArgumentException("Image URL cannot be null or empty.", nameof(imageUrl));
+                throw new ArgumentException(ExceptionMessage.ImageUrlNullOrEmpty, nameof(imageUrl));
             }
 
             Uri uri = new(imageUrl);
@@ -74,7 +74,7 @@ namespace TicketBooking.Service.Service.Implementation
 
             if (uploadIndex == -1)
             {
-                throw new ArgumentException("Invalid Cloudinary URL.", nameof(imageUrl));
+                throw new ArgumentException(ExceptionMessage.InvalidCloudinaryUrl, nameof(imageUrl));
             }
 
             string publicPath = path[(uploadIndex + "/upload/".Length)..];

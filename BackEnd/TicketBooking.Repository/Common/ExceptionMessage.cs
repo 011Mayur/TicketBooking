@@ -56,5 +56,18 @@ namespace TicketBooking.Repository.Common
         public static readonly string CouponNotApplicableToEvent =
             "This coupon is not valid for this event.";
         public static readonly string CouponAlreadyUsed = "You have already used this coupon.";
+
+        public static readonly string UserIdClaimMissing = "User id claim missing";
+        public static readonly string FrontEndUrlNotConfigured = "FrontEndUrl Not configured";
+        public static readonly string RazorpayKeyIdNotConfigured = "Razorpay KeyId not configured";
+        public static readonly string RazorpayKeySecretNotConfigured = "Razorpay KeySecret not configured";
+        public static readonly string FailedToCreatePaymentOrder = "Failed to create payment order";
+        public static readonly string BookingNotFound = "Booking not found";
+        public static readonly string ImageUrlNullOrEmpty = "Image URL cannot be null or empty.";
+        public static readonly string InvalidCloudinaryUrl = "Invalid Cloudinary URL.";
+        public static readonly string ConnectionStringNotFound = "Connection string not found.";
+        public static readonly string RefreshTokenMissing = "Refresh token missing";
+        public static readonly string RefreshTokenExpired = "Refresh token expired or invalid";
+        public static readonly string UserNotFound = "User not found";
     }
 }

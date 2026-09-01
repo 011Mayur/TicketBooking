@@ -299,7 +299,6 @@ namespace TicketBooking.Repository.Repository.Implementation
         {
             List<HomePageEvent> events = [];
 
-            // If no search query, return empty or default results
             if (string.IsNullOrWhiteSpace(searchQuery))
                 return events;
 

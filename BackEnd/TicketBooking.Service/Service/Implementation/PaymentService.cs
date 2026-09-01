@@ -30,19 +30,15 @@ namespace TicketBooking.Service.Service.Implementation
 
         private readonly string _razorpayKeyId =
             config["Razorpay:KeyId"]
-            ?? throw new InvalidOperationException("Razorpay KeyId not configured");
+            ?? throw new InvalidOperationException(ExceptionMessage.RazorpayKeyIdNotConfigured);
         private readonly string _razorpayKeySecret =
             config["Razorpay:KeySecret"]
-            ?? throw new InvalidOperationException("Razorpay KeySecret not configured");
+            ?? throw new InvalidOperationException(ExceptionMessage.RazorpayKeySecretNotConfigured);
 
         private static readonly TimeSpan LockExpiry = TimeSpan.FromMinutes(15);
 
         private RazorpayClient GetRazorpayClient() => new(_razorpayKeyId, _razorpayKeySecret);
 
-        /// <summary>
-        /// NEW FLOW: Create payment order + booking lock
-        /// Called when user navigates to payment page
-        /// </summary>
         public async Task<CreatePaymentOrderResponse> CreatePaymentOrderAsync(
             int bookingId,
             int userId,
@@ -121,11 +117,8 @@ namespace TicketBooking.Service.Service.Implementation
                 Order order = client.Order.Create(orderOptions);
                 string razorpayOrderId = order["id"].ToString();
 
-                // ✅ Delete any stale lock for this user+event before creating a fresh one
-                // Prevents duplicate locks when user refreshes/re-enters payment page
                 await _bookingLockRepo.DeleteExistingLockForUserAsync(userId, bookingData.EventId);
 
-                // ✅ Lock only — no booking row, no seat decrement here
                 await _bookingLockRepo.CreateBookingLockAsync(
                     eventId: bookingData.EventId,
                     userId: userId,
@@ -151,7 +144,7 @@ namespace TicketBooking.Service.Service.Implementation
                 return new CreatePaymentOrderResponse
                 {
                     OrderId = razorpayOrderId,
-                    BookingId = 0, // no real booking exists until payment is verified
+                    BookingId = 0,
                     Amount = finalAmount,
                     Currency = "INR",
                     RazorpayKeyId = _razorpayKeyId,
@@ -164,13 +157,10 @@ namespace TicketBooking.Service.Service.Implementation
             catch (Exception ex)
             {
                 _logger.LogError($"Payment order creation failed: {ex.Message}");
-                throw new BusinessRuleException("Failed to create payment order");
+                throw new BusinessRuleException(ExceptionMessage.FailedToCreatePaymentOrder);
             }
         }
 
-        /// <summary>
-        /// NEW FLOW: Verify payment + update booking status to Paid
-        /// </summary>
         public async Task<PaymentVerificationResponse> VerifyPaymentAsync(
             VerifyPaymentRequest request,
             int userId
@@ -221,7 +211,6 @@ namespace TicketBooking.Service.Service.Implementation
                 int totalLocked = await _bookingLockRepo.GetTotalLockedQuantityAsync(
                     bookingLock.EventId
                 );
-                // Exclude THIS user's lock from the total — their seats are already reserved
                 int otherLocked = totalLocked - bookingLock.Quantity;
                 int actualAvailable = evt.AvailableSeats - otherLocked;
 
@@ -231,7 +220,6 @@ namespace TicketBooking.Service.Service.Implementation
                         $"Seats not available for booking lock {request.RazorpayOrderId}"
                     );
                     await _bookingLockRepo.DeleteLockAsync(request.RazorpayOrderId);
-                    // Payment was captured but seats vanished — needs manual refund handling; log loudly.
                     _logger.LogError(
                         $"Captured payment {request.RazorpayPaymentId} has no seats to fulfil — refund required."
                     );
@@ -260,7 +248,6 @@ namespace TicketBooking.Service.Service.Implementation
                     DiscountType = Enum.Parse<BookingDiscountType>(bookingLock.DiscountType),
                 };
 
-                // Atomically create booking and mark coupon used in one transaction
                 var bookingResult = await _bookingRepo.CreateBookingAndMarkCouponAsync(
                     bookingDto,
                     BookingStatus.Paid
@@ -318,9 +305,6 @@ namespace TicketBooking.Service.Service.Implementation
             }
         }
 
-        /// <summary>
-        /// Check if payment was attempted and mark booking as Failed if needed
-        /// </summary>
         public async Task<CheckPaymentAttemptResponse> CheckPaymentAttemptAsync(string orderId)
         {
             try
@@ -372,7 +356,7 @@ namespace TicketBooking.Service.Service.Implementation
             var booking = await _bookingRepo.GetBookingByIdAsync(bookingId);
 
             if (booking is null || booking.UserId != userId)
-                throw new ResourceNotFoundException("Booking not found");
+                throw new ResourceNotFoundException(ExceptionMessage.BookingNotFound);
 
             // Store payment ID if provided (for Failed status)
             if (!string.IsNullOrEmpty(razorpayPaymentId))

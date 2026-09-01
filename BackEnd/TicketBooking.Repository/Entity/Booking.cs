@@ -34,5 +34,7 @@ namespace TicketBooking.Repository.Entity
         public required BookingDiscountType DiscountType { get; set; } = BookingDiscountType.None;
 
         public string? PaymentFailureReason { get; set; }
+
+        public bool IsCheckedIn { get; set; } = false;
     }
 }

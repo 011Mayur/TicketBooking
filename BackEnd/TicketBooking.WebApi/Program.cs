@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using Quartz;
 using TicketBooking.Repository;
 using TicketBooking.Repository.Repository.Implementation;
@@ -42,9 +43,19 @@ builder.Services.AddSwaggerGen(c =>
                 "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
         }
     );
-    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        [new OpenApiSecuritySchemeReference("bearer", document)] = [],
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
 });
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
@@ -101,13 +112,14 @@ builder.Services.AddHangfire(config =>
     )
 );
 builder.Services.AddHangfireServer();
+string frontEndUrl = builder.Configuration.GetValue<string>("frontEndUrl") ?? "http://localhost:5173";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         "ReactFrontEnd",
         policy =>
             policy
-                .WithOrigins("http://localhost:5173", "https://localhost:5173")
+                .WithOrigins(frontEndUrl, frontEndUrl.Replace("http://", "https://"))
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()

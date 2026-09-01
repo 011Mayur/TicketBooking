@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import api from "../../api/axios";
 import { API_ROUTES } from "../../constants/apiRoutes";
+import { MESSAGES } from "../../constants";
 import { getErrorMessage } from "../../utils/errorUtils";
 import type {
   ApiErrorResponse,
@@ -80,7 +81,7 @@ export function useEventTypeManagement() {
     editingTypeId: number | null,
   ): Promise<boolean> => {
     if (!typeName.trim()) {
-      toast.error("Type name cannot be empty");
+      toast.error(MESSAGES.ERROR.TYPE_NAME_EMPTY);
       return false;
     }
     try {
@@ -91,10 +92,10 @@ export function useEventTypeManagement() {
           API_ROUTES.EVENT_MANAGEMENT.TYPES_ID(editingTypeId),
           payload,
         );
-        toast.success("Event type updated successfully");
+        toast.success(MESSAGES.SUCCESS.EVENT_TYPE_UPDATED);
       } else {
         await api.post(API_ROUTES.EVENT_MANAGEMENT.TYPES, payload);
-        toast.success("Event type created successfully");
+        toast.success(MESSAGES.SUCCESS.EVENT_TYPE_CREATED);
       }
       fetchEventTypes();
       return true;
@@ -113,7 +114,7 @@ export function useEventTypeManagement() {
     editingCategoryId: number | null,
   ): Promise<boolean> => {
     if (!categoryName.trim()) {
-      toast.error("Category name cannot be empty");
+      toast.error(MESSAGES.ERROR.CATEGORY_NAME_EMPTY);
       return false;
     }
     try {
@@ -124,10 +125,10 @@ export function useEventTypeManagement() {
           API_ROUTES.EVENT_MANAGEMENT.CATEGORIES_ID(editingCategoryId),
           payload,
         );
-        toast.success("Category updated successfully");
+        toast.success(MESSAGES.SUCCESS.CATEGORY_UPDATED);
       } else {
         await api.post(API_ROUTES.EVENT_MANAGEMENT.CATEGORIES, payload);
-        toast.success("Category created successfully");
+        toast.success(MESSAGES.SUCCESS.CATEGORY_CREATED);
         fetchEventTypes();
       }
       await fetchCategories(typeId);
@@ -171,7 +172,7 @@ export function useEventTypeManagement() {
         errorCode === "ACTIVE_EVENTS_EXIST" ||
         errorCode === "CATEGORIES_EXIST"
       ) {
-        toast.error(`${errorMsg} - Page state has changed. Refreshing...`);
+        toast.error(MESSAGES.ERROR.PAGE_STATE_CHANGED(errorMsg));
         if (selectedTypeForCategories) {
           fetchCategories(selectedTypeForCategories.id);
         }

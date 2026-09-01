@@ -1,3 +1,6 @@
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Model.DTO;
 using TicketBooking.Repository.Repository.Interface;
@@ -5,20 +8,33 @@ using TicketBooking.Service.Service.Interface;
 
 namespace TicketBooking.Service.Service.Implementation
 {
-    public class BookingService(
-        IBookingRepository bookingRepo,
-        IBookingLockRepository bookingLockRepo,
-        IEventService eventService,
-        ICouponService couponService
-    ) : IBookingService
+    public class BookingService : IBookingService
     {
-        private readonly IBookingRepository _bookingRepo = bookingRepo;
-        private readonly IBookingLockRepository _bookingLockRepo = bookingLockRepo;
-        private readonly IEventService _eventService = eventService;
-        private readonly ICouponService _couponService = couponService;
+        private readonly IBookingRepository _bookingRepo;
+        private readonly IBookingLockRepository _bookingLockRepo;
+        private readonly IEventService _eventService;
+        private readonly ICouponService _couponService;
 
         private static readonly TimeSpan BookingExpiry = TimeSpan.FromMinutes(15);
         private static readonly TimeSpan LockExpiry = TimeSpan.FromMinutes(15);
+
+        static BookingService()
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+        }
+
+        public BookingService(
+            IBookingRepository bookingRepo,
+            IBookingLockRepository bookingLockRepo,
+            IEventService eventService,
+            ICouponService couponService
+        )
+        {
+            _bookingRepo = bookingRepo;
+            _bookingLockRepo = bookingLockRepo;
+            _eventService = eventService;
+            _couponService = couponService;
+        }
 
         /// <summary>
         /// NEW FLOW: On checkout page - just validate, don't create booking
@@ -248,6 +264,171 @@ namespace TicketBooking.Service.Service.Implementation
                 );
 
             return await _bookingRepo.ReleaseBookingAsync(bookingId, status);
+        }
+
+        public async Task<byte[]> GenerateTicketPdfAsync(int bookingId, int userId)
+        {
+            var booking = await GetBookingByIdAsync(bookingId, userId);
+            var eventDetails = await _eventService.GetEventByIdAsync(booking.EventId);
+
+            if (eventDetails == null)
+            {
+                throw new Exception("Event not found for this booking.");
+            }
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(new PageSize(800, 380));
+                    page.Margin(0);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial"));
+
+                    page.Content()
+                        .Background(Colors.White)
+                        .Padding(32)
+                        .Column(column =>
+                        {
+                            // Brand and Badge Row
+                            column
+                                .Item()
+                                .Row(r =>
+                                {
+                                    r.RelativeItem()
+                                        .Text("TICKETBOOKING")
+                                        .FontSize(16)
+                                        .Black()
+                                        .FontColor("#4540e1");
+                                    r.AutoItem()
+                                        .Background("#E8F5E9")
+                                        .PaddingHorizontal(12)
+                                        .PaddingVertical(6)
+                                        .Text("✓ CONFIRMED")
+                                        .FontSize(12)
+                                        .Bold()
+                                        .FontColor("#2E7D32");
+                                });
+
+                            // Event Title
+                            column
+                                .Item()
+                                .PaddingTop(30)
+                                .Text(booking.EventTitle)
+                                .FontSize(28)
+                                .Bold()
+                                .FontColor(Colors.Black);
+
+                            // Date & Venue Details
+                            column
+                                .Item()
+                                .PaddingTop(25)
+                                .Row(r =>
+                                {
+                                    r.RelativeItem()
+                                        .Column(c =>
+                                        {
+                                            c.Item()
+                                                .Text("DATE & TIME")
+                                                .FontSize(10)
+                                                .SemiBold()
+                                                .FontColor(Colors.Grey.Darken1);
+                                            c.Item()
+                                                .Text(
+                                                    $"{eventDetails.EventDate:MMM dd, yyyy} • {eventDetails.EventTime:hh\\:mm}"
+                                                )
+                                                .FontSize(15)
+                                                .Medium()
+                                                .FontColor(Colors.Grey.Darken3);
+                                        });
+                                    r.RelativeItem()
+                                        .Column(c =>
+                                        {
+                                            c.Item()
+                                                .Text("VENUE")
+                                                .FontSize(10)
+                                                .SemiBold()
+                                                .FontColor(Colors.Grey.Darken1);
+                                            c.Item()
+                                                .Text(eventDetails.Venue)
+                                                .FontSize(15)
+                                                .Medium()
+                                                .FontColor(Colors.Grey.Darken3);
+                                        });
+                                });
+
+                            // Divider
+                            column
+                                .Item()
+                                .PaddingTop(25)
+                                .LineHorizontal(1)
+                                .LineColor(Colors.Grey.Lighten2);
+
+                            // Financials & IDs
+                            column
+                                .Item()
+                                .PaddingTop(20)
+                                .Row(r =>
+                                {
+                                    r.RelativeItem()
+                                        .Column(c =>
+                                        {
+                                            c.Item()
+                                                .Text("TICKETS")
+                                                .FontSize(10)
+                                                .SemiBold()
+                                                .FontColor(Colors.Grey.Darken1);
+                                            c.Item()
+                                                .Text($"{booking.Quantity}")
+                                                .FontSize(22)
+                                                .Bold()
+                                                .FontColor(Colors.Black);
+                                        });
+                                    r.RelativeItem()
+                                        .Column(c =>
+                                        {
+                                            c.Item()
+                                                .Text("AMOUNT PAID")
+                                                .FontSize(10)
+                                                .SemiBold()
+                                                .FontColor(Colors.Grey.Darken1);
+                                            c.Item()
+                                                .Text($"Rs. {booking.FinalAmount:F2}")
+                                                .FontSize(22)
+                                                .Bold()
+                                                .FontColor(Colors.Black);
+                                        });
+                                    r.RelativeItem()
+                                        .Column(c =>
+                                        {
+                                            c.Item()
+                                                .Text("BOOKING ID")
+                                                .FontSize(10)
+                                                .SemiBold()
+                                                .FontColor(Colors.Grey.Darken1);
+                                            c.Item()
+                                                .Text($"#{booking.Id}")
+                                                .FontSize(22)
+                                                .Bold()
+                                                .FontColor(Colors.Black);
+                                        });
+                                });
+
+                            // Footer Note
+                            column
+                                .Item()
+                                .PaddingTop(35)
+                                .Text(
+                                    "Present this ticket at the venue entrance for entry. Valid for one-time use only."
+                                )
+                                .FontSize(11)
+                                .Italic()
+                                .FontColor(Colors.Grey.Medium);
+                        });
+                });
+            });
+
+            return document.GeneratePdf();
         }
     }
 }

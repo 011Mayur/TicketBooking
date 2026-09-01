@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -22,6 +23,7 @@ import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import type { Event, EventCategory, EventSortColumn, EventTypeDetail } from "../../types";
 import type { SortDir } from "../../types";
 import type { CategoryEventsState } from "../../hooks/admin/useEventList";
+import { APP_ROUTES } from "../../constants/appRoutes";
 
 interface SortState {
   field: EventSortColumn;
@@ -107,6 +109,7 @@ const EventTableSection = ({
   onHeaderClick,
   onFetchEvents,
 }: EventTableSectionProps) => {
+  const navigate = useNavigate();
   const isSorted = (column: EventSortColumn) =>
     sorts[selectedCategory.id]?.field === column;
 
@@ -229,7 +232,13 @@ const EventTableSection = ({
                   <TableRow
                     key={event.id}
                     hover
-                    sx={{ "&:hover": { backgroundColor: "#f9f9f9" } }}
+                    onClick={() =>
+                      navigate(APP_ROUTES.ADMIN_EVENT_DETAIL(event.id))
+                    }
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": { backgroundColor: "#f9f9f9" },
+                    }}
                   >
                     <TableCell sx={{ py: 1.5 }}>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>

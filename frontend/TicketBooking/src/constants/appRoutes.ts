@@ -1,7 +1,7 @@
 export const APP_ROUTES = Object.freeze({
   ROOT: "/",
   HOME: "/home",
-  ADMIN_LOGIN: "/admin-login",
+  ADMIN_LOGIN: "/admin/login",
   USER_LOGIN: "/user-login",
   REGISTER: "/register",
   ADMIN: "/admin",
@@ -19,4 +19,5 @@ export const APP_ROUTES = Object.freeze({
   BOOKINGS: "/bookings",
   EVENT_MANAGEMENT: "/admin/event-management",
   MY_BOOKINGS: "/my-bookings",
+  ADMIN_EVENT_DETAIL: (id: number | string) => `/admin/events/${id}`,
 });

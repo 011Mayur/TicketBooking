@@ -152,7 +152,19 @@ const Payment = () => {
 
   // Guard 7: Check payment success
   if (paymentSuccess) {
-    return <PaymentStateScreen variant="success" />;
+    // Build booking summary for ticket download
+    const successBookingData = {
+      id: paymentOrder?.bookingId || 0,
+      eventId: checkoutData.eventId,
+      eventTitle: paymentEvent?.title || "Event",
+      eventDate: paymentEvent?.eventDate || new Date().toISOString().split("T")[0],
+      eventTime: paymentEvent?.eventTime || "00:00:00",
+      venue: paymentEvent?.venue || "",
+      quantity: checkoutData.quantity,
+      finalAmount: paymentOrder?.amount || 0,
+      paymentStatus: "Completed" as const,
+    };
+    return <PaymentStateScreen variant="success" bookingData={successBookingData} />;
   }
 
   // ========================================
@@ -203,6 +215,8 @@ const Payment = () => {
       >
         <ArrowBackIcon fontSize="small" sx={{ mr: 0.5 }} /> Back
       </Button>
+
+
 
       {/* Event header */}
       {displayEvent && <PaymentEventHeader event={displayEvent} />}
