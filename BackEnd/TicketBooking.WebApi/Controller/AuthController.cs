@@ -1,10 +1,12 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Model.DTO;
 using TicketBooking.Service.Service.Interface;
 using TicketBooking.WebApi.Constant;
 using TicketBooking.WebApi.DTO;
+using static TicketBooking.Repository.Common.ResponseMessage;
 
 namespace TicketBooking.WebApi.Controller
 {
@@ -46,8 +48,6 @@ namespace TicketBooking.WebApi.Controller
             string accessToken = _jwtService.GenerateToken(user);
             string refreshToken = await _userService.CreateRefreshTokenAsync(user.Id);
 
-           
-
             CookieOptions accessCookie = new()
             {
                 HttpOnly = true,
@@ -81,7 +81,7 @@ namespace TicketBooking.WebApi.Controller
         public async Task<IActionResult> Refresh()
         {
             if (!Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
-                return Unauthorized(new { message = "Refresh token missing" });
+                return Unauthorized(new { message = ExceptionMessage.RefreshTokenMissing });
             int accessTokenExpiry = _configuration.GetValue<int>("jwt:AccessTokenExpiryMinutes");
 
             RefreshTokenDto? validToken = await _userService.ValidateRefreshTokenAsync(
@@ -89,11 +89,11 @@ namespace TicketBooking.WebApi.Controller
             );
 
             if (validToken is null)
-                return Unauthorized(new { message = "Refresh token expired or invalid" });
+                return Unauthorized(new { message = ExceptionMessage.RefreshTokenExpired });
 
             UserLoginResponseDto? user = await _userService.GetUserByIdAsync(validToken.UserId);
             if (user is null)
-                return Unauthorized(new { message = "User not found" });
+                return Unauthorized(new { message = ExceptionMessage.UserNotFound });
 
             string newAccessToken = _jwtService.GenerateToken(user);
 
@@ -106,7 +106,7 @@ namespace TicketBooking.WebApi.Controller
             };
             Response.Cookies.Append("access_token", newAccessToken, accessCookie);
 
-            return Ok(new { message = "Token refreshed" });
+            return Ok(new { message = ResponseMessage.TokenRefreshed });
         }
 
         [HttpPost("logout")]
@@ -119,7 +119,7 @@ namespace TicketBooking.WebApi.Controller
 
             Response.Cookies.Delete("access_token");
             Response.Cookies.Delete("refresh_token");
-            return Success(ApiMessage.LogOutSuccessful );
+            return Success(ApiMessage.LogOutSuccessful);
         }
 
         [HttpPost("forgot-password")]

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\TicketBooking.Repository\TicketBooking.Repository.csproj" />
   </ItemGroup>
@@ -10,6 +10,8 @@
     <PackageReference Include="Quartz" Version="3.19.1" />
     <PackageReference Include="Razorpay" Version="3.3.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.20.0" />
+    <PackageReference Include="QuestPDF" Version="2024.12.2" />
+
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,23 +1,24 @@
 import { z } from "zod";
+import { MESSAGES } from "../constants";
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 export const eventSchema = z
   .object({
     title: z
       .string()
-      .min(1, "Title is required")
-      .max(200, "title must be under 200 Characters"),
+      .min(1, MESSAGES.VALIDATION.TITLE_REQUIRED)
+      .max(200, MESSAGES.VALIDATION.TITLE_MAX_LENGTH),
     artistName: z
       .string()
-      .min(1, "Artist name is required")
-      .max(50, "Artist Name Must Not Exceed 50 Characters"),
+      .min(1, MESSAGES.VALIDATION.ARTIST_REQUIRED)
+      .max(50, MESSAGES.VALIDATION.ARTIST_MAX_LENGTH),
     venue: z
       .string()
-      .min(1, "Venue is required")
-      .max(200, "Venue must be under 200 Characters"),
+      .min(1, MESSAGES.VALIDATION.VENUE_REQUIRED)
+      .max(200, MESSAGES.VALIDATION.VENUE_MAX_LENGTH),
     eventDate: z
       .string()
-      .min(1, "Event date is required")
+      .min(1, MESSAGES.VALIDATION.EVENT_DATE_REQUIRED)
       .refine(
         (value) => {
           const selectedDate = new Date(value);
@@ -25,13 +26,13 @@ export const eventSchema = z
           return selectedDate > today;
         },
         {
-          message: "Event date must be in future",
+          message: MESSAGES.VALIDATION.EVENT_DATE_FUTURE,
         },
       ),
     eventTime: z
       .string()
-      .min(1, "Event time is required")
-      .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Enter a valid time"),
+      .min(1, MESSAGES.VALIDATION.EVENT_TIME_REQUIRED)
+      .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, MESSAGES.VALIDATION.EVENT_TIME_INVALID),
     ticketPrice: z.coerce
       .number({ error: "Ticket price must be a number" })
       .positive("Ticket price must be greater than 0"),
@@ -51,8 +52,8 @@ export const eventSchema = z
       .positive("Please select an event category"),
     description: z
       .string()
-      .min(1, "discription is required")
-      .max(300, "discription Must Not Exceed 300 Characters"),
+      .min(1, MESSAGES.VALIDATION.DESCRIPTION_REQUIRED)
+      .max(300, MESSAGES.VALIDATION.DESCRIPTION_MAX_LENGTH),
   })
   .superRefine((data, ctx) => {
 
@@ -65,14 +66,14 @@ export const eventSchema = z
         ctx.addIssue({
           path: ["bulkTicketForDiscount"],
           code: z.ZodIssueCode.custom,
-          message: "Ticket Count must be greater than 0",
+          message: MESSAGES.VALIDATION.TICKET_COUNT_GT_ZERO,
         });
       }
       if (!data.discountPercentage || Number(data.discountPercentage) < 1) {
         ctx.addIssue({
           path: ["discountPercentage"],
           code: z.ZodIssueCode.custom,
-          message: "Discount Percentage must be greater than 0",
+          message: MESSAGES.VALIDATION.DISCOUNT_GT_ZERO,
         });
       }
     }

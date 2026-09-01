@@ -28,6 +28,7 @@ import { API_ROUTES } from "../constants/apiRoutes";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { APP_ROUTES } from "../constants/appRoutes";
+import { MESSAGES } from "../constants";
 import SettingsIcon from "@mui/icons-material/Settings";
 const DRAWER_WIDTH = 240;
 
@@ -63,10 +64,10 @@ const AdminLayout = () => {
     handleMenuClose();
     try {
       await api.post(API_ROUTES.AUTH.LOGOUT);
-      toast.success("Logged out successfully.");
+      toast.success(MESSAGES.AUTH.LOGOUT_SUCCESS);
       navigate(APP_ROUTES.ADMIN_LOGIN);
     } catch {
-      toast.error("Logout failed. Try again.");
+      toast.error(MESSAGES.AUTH.LOGOUT_FAIL);
     }
   };
 

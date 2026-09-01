@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "../constants/appRoutes";
 import { useAuth } from "../hooks/auth/useAuth";
 import { toast } from "react-toastify";
+import { MESSAGES } from "../constants";
 
 const settings = ["My Bookings", "Logout"];
 
@@ -33,7 +34,7 @@ const UserAvatarMenu = () => {
         const message = await logout();
         toast.success(message);
       } catch {
-        toast.error("Logout failed, please try again");
+        toast.error(MESSAGES.AUTH.LOGOUT_FAIL);
       } finally {
         navigate(APP_ROUTES.USER_LOGIN);
       }

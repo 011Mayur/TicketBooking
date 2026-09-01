@@ -54,7 +54,7 @@ namespace TicketBooking.WebApi.Controller
         public async Task<IActionResult> Update(int id, [FromBody] EventUpdateDto dto)
         {
             if (id != dto.Id)
-                return BadRequest(new { message = "ID mismatch." });
+                return BadRequest(new { message = ResponseMessage.IdMismatch });
 
             await _eventService.UpdateEventAsync(dto);
             return NoContent();

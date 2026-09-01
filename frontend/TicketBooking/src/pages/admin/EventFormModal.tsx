@@ -42,6 +42,8 @@ interface EventFormModalProps {
   eventId?: number;
   typeId: number | null;
   categoryId: number | null;
+  typeName?: string;
+  categoryName?: string;
   onClose: () => void;
   onSave: () => void;
 }
@@ -51,6 +53,8 @@ const EventFormModal = ({
   eventId,
   typeId,
   categoryId,
+  typeName,
+  categoryName,
   onClose,
   onSave,
 }: EventFormModalProps) => {
@@ -216,18 +220,25 @@ const EventFormModal = ({
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-start",
           p: 2,
           borderBottom: "1px solid #e0e0e0",
         }}
       >
-        <DialogTitle sx={{ p: 0, m: 0 }}>
-          {mode === "add" ? "Create Event" : "Edit Event"}
-        </DialogTitle>
+        <Box>
+          <DialogTitle sx={{ p: 0, m: 0 }}>
+            {mode === "add" ? "Create Event" : "Edit Event"}
+          </DialogTitle>
+          {mode === "add" && typeName && categoryName && (
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
+              Adding to: {typeName} &gt; {categoryName}
+            </Typography>
+          )}
+        </Box>
         <Button
           size="small"
           onClick={handleClose}
-          sx={{ color: "#999", minWidth: "auto" }}
+          sx={{ color: "#999", minWidth: "auto", mt: -0.5 }}
         >
           <CloseIcon fontSize="small" />
         </Button>

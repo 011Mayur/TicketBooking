@@ -49,7 +49,7 @@ namespace TicketBooking.Repository.Repository.Implementation
         {
             string connectionString =
                 _config["ConnectionStrings:DefaultConnection"]
-                ?? throw new InvalidOperationException("Connection string not found.");
+                ?? throw new InvalidOperationException(ExceptionMessage.ConnectionStringNotFound);
 
             await using (MySqlConnection connection = new(connectionString))
             {

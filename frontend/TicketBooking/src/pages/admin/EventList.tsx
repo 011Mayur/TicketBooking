@@ -4,13 +4,10 @@ import {
   CircularProgress,
   Box,
   Paper,
-  IconButton,
   Menu,
   MenuItem,
-  Button,
   Dialog,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { toast } from "react-toastify";
 import api from "../../api/axios";
 import { API_ROUTES } from "../../constants/apiRoutes";
@@ -208,6 +205,8 @@ const EventList = () => {
           eventId={editingEvent?.id}
           typeId={selectedTypeId}
           categoryId={selectedCategoryId}
+          typeName={selectedType?.name}
+          categoryName={selectedCategory?.name}
           onClose={handleModalClose}
           onSave={handleEventSaved}
         />

@@ -17,7 +17,7 @@ namespace TicketBooking.Repository.Repository.Implementation
         private readonly ILogger<EventRepository> _logger = logger;
         private string ConnectionString =>
             _config["ConnectionStrings:DefaultConnection"]
-            ?? throw new InvalidOperationException("Connection string not found.");
+            ?? throw new InvalidOperationException(ExceptionMessage.ConnectionStringNotFound);
 
         public async Task<int> CreateEventAsync(EventCreateDto dto)
         {

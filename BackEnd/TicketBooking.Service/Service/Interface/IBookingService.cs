@@ -28,5 +28,7 @@ namespace TicketBooking.Service.Service.Interface
             string? couponCode,
             BookingStatus status
         );
+
+        Task<byte[]> GenerateTicketPdfAsync(int bookingId, int userId);
     }
 }

@@ -13,7 +13,7 @@ namespace TicketBooking.Repository.Repository.Implementation
 
         private string ConnectionString =>
             _config["ConnectionStrings:DefaultConnection"]
-            ?? throw new InvalidOperationException("Connection string not found.");
+            ?? throw new InvalidOperationException(ExceptionMessage.ConnectionStringNotFound);
 
 
         public async Task<BookingResponseDto?> GetBookingByIdAsync(int id)

@@ -13,6 +13,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { toast } from "react-toastify";
 import type { AxiosError } from "axios";
 import { uploadPoster } from "../../services/eventService";
+import { MESSAGES } from "../../constants";
 
 interface PosterUploadZoneProps {
   posterImageUrl: string | undefined;
@@ -33,12 +34,12 @@ const PosterUploadZone = ({
 
   const handleImageUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file.");
+      toast.error(MESSAGES.ERROR.INVALID_IMAGE);
       return;
     }
     const maxSizeMB = 5;
     if (file.size > maxSizeMB * 1024 * 1024) {
-      toast.error(`Image must be smaller than ${maxSizeMB}MB.`);
+      toast.error(MESSAGES.ERROR.IMAGE_TOO_LARGE(maxSizeMB));
       return;
     }
 
@@ -46,7 +47,7 @@ const PosterUploadZone = ({
     try {
       const poster = await uploadPoster(file);
       onUploaded(poster.url);
-      toast.success("Image uploaded successfully!");
+      toast.success(MESSAGES.SUCCESS.IMAGE_UPLOADED);
     } catch (error) {
       const axiosErr = error as AxiosError<{ message?: string }>;
       toast.error(axiosErr.response?.data?.message ?? "Failed to upload image.");

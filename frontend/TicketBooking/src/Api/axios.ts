@@ -3,7 +3,7 @@ import { API_ROUTES } from "../constants/apiRoutes";
 import type { ApiErrorResponse } from "../types";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
   withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });

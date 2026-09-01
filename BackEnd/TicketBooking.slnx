@@ -1,5 +1,0 @@
-<Solution>
-  <Project Path="TicketBooking.Repository/TicketBooking.Repository.csproj" />
-  <Project Path="TicketBooking.Service/TicketBooking.Service.csproj" />
-  <Project Path="TicketBooking.WebApi/TicketBooking.WebApi.csproj" />
-</Solution>

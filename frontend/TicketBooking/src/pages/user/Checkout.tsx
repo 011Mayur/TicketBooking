@@ -193,6 +193,7 @@ const Checkout = () => {
         <ArrowBackIcon fontSize="small" sx={{ mr: 0.5 }} /> Back to Event
       </Button>
 
+
       <Box
         sx={{
           display: "grid",

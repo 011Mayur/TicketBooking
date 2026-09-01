@@ -5,18 +5,23 @@ import {
   Alert,
   Button,
   Card,
+  Box,
   useTheme,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import TicketDownload from "../../../components/Checkout/TicketDownload";
+import type { BookingSummaryResponse } from "../../../types";
 
 type Variant = "loading" | "not-found" | "success";
 
 const PaymentStateScreen = ({
   variant,
   onBack,
+  bookingData,
 }: {
   variant: Variant;
   onBack?: () => void;
+  bookingData?: BookingSummaryResponse | null;
 }) => {
   const theme = useTheme();
 
@@ -55,10 +60,20 @@ const PaymentStateScreen = ({
         >
           Your booking has been confirmed. Redirecting to your bookings...
         </Typography>
-        <CircularProgress />
+
+        {bookingData && (
+          <Box sx={{ mb: 3, display: "inline-block", minWidth: 200 }}>
+            <TicketDownload booking={bookingData} />
+          </Box>
+        )}
+
+        <Box>
+          <CircularProgress />
+        </Box>
       </Card>
     </Container>
   );
 };
 
 export default PaymentStateScreen;
+

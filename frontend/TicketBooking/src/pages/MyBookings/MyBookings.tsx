@@ -6,16 +6,29 @@ import {
   Tabs,
   Tab,
   Button,
-  Grid,
   CircularProgress,
   Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import PaymentIcon from "@mui/icons-material/Payment";
 import { useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "../../constants/appRoutes";
-import BookingCard from "./BookingCard";
 import type { BookingCategory } from "../../utils/bookingUtils";
 import { useMyBookings } from "../../hooks/booking/useMyBookings";
+import { formatEventDateTime } from "../../utils/dateUtils";
+import { classifyBooking } from "../../utils/bookingUtils";
+import BookingStatusChip from "./BookingStatusChip";
+import TicketDownload from "../../components/Checkout/TicketDownload";
 
 type TabKey = "all" | BookingCategory;
 
@@ -105,13 +118,73 @@ const MyBookings = () => {
       )}
 
       {!loading && !error && visible.length > 0 && (
-        <Grid container spacing={2.5}>
-          {visible.map((b) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={b.id}>
-              <BookingCard booking={b} />
-            </Grid>
-          ))}
-        </Grid>
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+          <Table sx={{ minWidth: 650 }}>
+            <TableHead sx={{ backgroundColor: "rgba(0,0,0,0.02)" }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 600 }}>Event</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Date & Time</TableCell>
+                <TableCell sx={{ fontWeight: 600 }}>Venue</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>Tickets</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: "right" }}>Amount</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {visible.map((b) => {
+                const category = classifyBooking(b);
+                const isPending = category === "pending";
+                
+                return (
+                  <TableRow key={b.id} hover>
+                    <TableCell sx={{ fontWeight: 500 }}>{b.eventTitle}</TableCell>
+                    <TableCell sx={{ color: "text.secondary" }}>
+                      {formatEventDateTime(b.eventDate, b.eventTime)}
+                    </TableCell>
+                    <TableCell sx={{ color: "text.secondary" }}>{b.venue}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{b.quantity}</TableCell>
+                    <TableCell sx={{ textAlign: "right", fontWeight: 600 }}>
+                      ₹{b.finalAmount.toFixed(2)}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <BookingStatusChip category={category} />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                        <Tooltip title="View Event">
+                          <IconButton size="small" onClick={() => navigate(APP_ROUTES.EVENT(b.eventId))}>
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        
+                        {isPending && (
+                          <Tooltip title="Complete Payment">
+                            <IconButton 
+                              size="small" 
+                              color="primary"
+                              onClick={() =>
+                                navigate(APP_ROUTES.PAYMENT(String(b.id)), {
+                                  state: { bookingId: b.id },
+                                })
+                              }
+                            >
+                              <PaymentIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        
+                        {(category === "upcoming" || category === "past") && (
+                          <TicketDownload booking={b} variant="icon" />
+                        )}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
     </Container>
   );

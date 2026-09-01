@@ -95,7 +95,7 @@ namespace TicketBooking.WebApi.Controller
         {
             string? claim =
                 User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                ?? throw new UnauthorizedAccessException("User id claim missing");
+                ?? throw new UnauthorizedAccessException(ExceptionMessage.UserIdClaimMissing);
             return int.Parse(claim);
         }
 
@@ -116,6 +116,15 @@ namespace TicketBooking.WebApi.Controller
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             bool released = await _bookingService.ReleaseBookingAsync(id, userId, request.Status);
             return Success(released, $"Booking released with status: {request.Status}");
+        }
+
+        [HttpGet("ticket-pdf/{id}")]
+        public async Task<IActionResult> GetTicketPdf(int id)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            byte[] pdfBytes = await _bookingService.GenerateTicketPdfAsync(id, userId);
+            
+            return File(pdfBytes, "application/pdf", $"ticket-{id}.pdf");
         }
     }
 }

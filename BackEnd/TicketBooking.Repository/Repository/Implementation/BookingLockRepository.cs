@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Entity;
 using TicketBooking.Repository.Repository.Interface;
 
@@ -12,7 +13,7 @@ namespace TicketBooking.Repository.Repository.Implementation
 
         private string ConnectionString =>
             _config["ConnectionStrings:DefaultConnection"]
-            ?? throw new InvalidOperationException("Connection string not found.");
+            ?? throw new InvalidOperationException(ExceptionMessage.ConnectionStringNotFound);
 
         public async Task<BookingLock> CreateBookingLockAsync(
             int eventId,

@@ -50,7 +50,7 @@ namespace TicketBooking.Service.Service.Implementation
             UserLoginResponseDto? user = await _userRepo.GetUserByEmail(email);
             string frontendBaseUrl =
                 _configuration.GetValue<string>("frontEndUrl")
-                ?? throw new InvalidOperationException("FrontEndUrl Not configured");
+                ?? throw new InvalidOperationException(ExceptionMessage.FrontEndUrlNotConfigured);
 
             if (user is null)
                 return;

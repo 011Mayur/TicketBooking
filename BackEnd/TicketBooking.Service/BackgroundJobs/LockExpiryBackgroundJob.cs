@@ -5,11 +5,6 @@ using TicketBooking.Service.Service.Interface;
 
 namespace TicketBooking.Service.BackgroundJobs
 {
-    /// <summary>
-    /// Background job to expire stale booking locks (15+ mins old)
-    /// and release expired bookings
-    /// Runs every 5 minutes
-    /// </summary>
     [DisallowConcurrentExecution]
     public class LockExpiryBackgroundJob(
         IBookingLockRepository bookingLockRepo,
@@ -27,11 +22,9 @@ namespace TicketBooking.Service.BackgroundJobs
             {
                 _logger.LogInformation("Starting lock expiry background job...");
 
-                // Delete expired locks
                 int expiredLocksCount = await _bookingLockRepo.DeleteExpiredLocksAsync();
                 _logger.LogInformation($"Deleted {expiredLocksCount} expired locks");
 
-                // Expire stale pending bookings
                 await _bookingService.ExpireStaleBookingsAsync();
                 _logger.LogInformation("Expired stale bookings");
             }

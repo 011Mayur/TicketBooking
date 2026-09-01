@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using TicketBooking.Repository.Common;
 using TicketBooking.Repository.Model.DTO;
 using TicketBooking.Repository.Repository.Interface;
 
@@ -11,7 +12,7 @@ namespace TicketBooking.Repository.Repository.Implementation
         private readonly IConfiguration _config = config;
         private string ConnectionString =>
             _config["ConnectionStrings:DefaultConnection"]
-            ?? throw new InvalidOperationException("Connection string not found.");
+            ?? throw new InvalidOperationException(ExceptionMessage.ConnectionStringNotFound);
 
         public async Task<int> CreateCouponAsync(CouponCreateDto dto)
         {

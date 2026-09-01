@@ -52,6 +52,7 @@ export const API_ROUTES = Object.freeze({
     RELEASE: (bookingId: number | string) => `/bookings/release/${bookingId}`,
     MY_BOOKINGS: `/bookings/my-bookings`,
     VALIDATE_CHECKOUT: "/bookings/validate-checkout",
+    TICKET_PDF: (bookingId: number | string) => `/bookings/ticket-pdf/${bookingId}`,
   },
   PAYMENT: {
     CREATE_ORDER: "/payment/create-order",
