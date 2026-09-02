@@ -7,6 +7,7 @@ import {
   CircularProgress,
   Avatar,
   useTheme,
+  type Theme,
 } from "@mui/material";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
@@ -28,7 +29,7 @@ interface Props {
   onPay: () => void;
 }
 
-const cardShell = (theme: any) => ({
+const cardShell = (theme: Theme) => ({
   borderRadius: 3,
   overflow: "hidden",
   boxShadow: "0 4px 20px rgba(0,0,0,0.06)",

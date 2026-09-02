@@ -55,7 +55,6 @@ const Checkout = () => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [couponModalOpen, setCouponModalOpen] = useState(false);
   const [validatingCheckout, setValidatingCheckout] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // ========================================
   // PRICE & DISCOUNT CALCULATION
@@ -96,13 +95,7 @@ const Checkout = () => {
       return;
     }
 
-    if (!event) {
-      setCheckoutError("Event data not loaded");
-      return;
-    }
-
     setValidatingCheckout(true);
-    setCheckoutError(null);
 
     try {
       const isValid = await validateCheckout({
@@ -124,8 +117,6 @@ const Checkout = () => {
             },
           },
         });
-      } else {
-        setCheckoutError("Checkout validation failed");
       }
     } catch (err) {
       let errorMsg = "Validation failed. Please try again.";
@@ -143,7 +134,7 @@ const Checkout = () => {
       }
 
       console.error("Checkout error:", errorMsg);
-      setCheckoutError(errorMsg);
+
       toast.error(errorMsg);
     } finally {
       setValidatingCheckout(false);
