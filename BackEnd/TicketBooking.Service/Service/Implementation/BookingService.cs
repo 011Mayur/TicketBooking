@@ -51,7 +51,10 @@ namespace TicketBooking.Service.Service.Implementation
             if (eventDateTime < DateTime.UtcNow)
                 throw new BusinessRuleException(ExceptionMessage.EventEnded);
 
-            // Check available seats (considering active locks)
+            // Remove any existing lock by this user to avoid them locking themselves out
+            await _bookingLockRepo.DeleteExistingLockForUserAsync(userId, dto.EventId);
+
+            // Check available seats (considering active locks by others)
             int totalLocked = await _bookingLockRepo.GetTotalLockedQuantityAsync(dto.EventId);
             int actualAvailable = evt.AvailableSeats - totalLocked;
 
@@ -237,33 +240,7 @@ namespace TicketBooking.Service.Service.Implementation
         {
             List<int> expiredIds = await _bookingRepo.GetExpiredPendingBookingIdsAsync();
 
-            foreach (int id in expiredIds)
-                await _bookingRepo.ReleaseBookingAsync(id);
-
-            // Also cleanup expired locks
             await _bookingLockRepo.DeleteExpiredLocksAsync();
-        }
-
-        public async Task<bool> ReleaseBookingAsync(int bookingId, int userId)
-        {
-            BookingResponseDto? booking = await _bookingRepo.GetBookingByIdAsync(bookingId);
-            if (booking is null || booking.UserId != userId)
-                throw new ResourceNotFoundException(
-                    ExceptionMessage.ResourceNotFound(bookingId, "Booking")
-                );
-
-            return await _bookingRepo.ReleaseBookingAsync(bookingId);
-        }
-
-        public async Task<bool> ReleaseBookingAsync(int bookingId, int userId, BookingStatus status)
-        {
-            BookingResponseDto? booking = await _bookingRepo.GetBookingByIdAsync(bookingId);
-            if (booking is null || booking.UserId != userId)
-                throw new ResourceNotFoundException(
-                    ExceptionMessage.ResourceNotFound(bookingId, "Booking")
-                );
-
-            return await _bookingRepo.ReleaseBookingAsync(bookingId, status);
         }
 
         public async Task<byte[]> GenerateTicketPdfAsync(int bookingId, int userId)

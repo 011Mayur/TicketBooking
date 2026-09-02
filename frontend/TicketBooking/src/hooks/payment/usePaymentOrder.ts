@@ -43,11 +43,14 @@ export const usePaymentOrder = ({
                 setPaymentOrder(data);
                 setError(null);
             } catch (err) {
-                const errorMsg = axios.isAxiosError(err)
-                    ? (err.response?.data as ApiErrorResponse)?.message ||
-                    err.message ||
-                    "Failed to create payment order"
-                    : "Failed to create payment order";
+                let errorMsg = "Failed to create payment order";
+                if (axios.isAxiosError(err)) {
+                    if (err.response?.status === 422) {
+                        errorMsg = " Please try again in 15 minutes.";
+                    } else {
+                        errorMsg = (err.response?.data as ApiErrorResponse)?.message || err.message || errorMsg;
+                    }
+                }
 
                 console.error("Payment order exception:", errorMsg, err);
                 setError(errorMsg);

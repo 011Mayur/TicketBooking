@@ -16,12 +16,5 @@ namespace TicketBooking.Service.Service.Interface
         );
 
         Task<CheckPaymentAttemptResponse> CheckPaymentAttemptAsync(string orderId);
-
-        Task ReleaseBookingAsync(
-            int bookingId,
-            BookingStatus status,
-            string? razorpayPaymentId,
-            int userId
-        );
     }
 }

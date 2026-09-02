@@ -75,7 +75,14 @@ namespace TicketBooking.Repository.Repository.Implementation
             };
             command.Parameters.Add(newIdParam);
 
-            await command.ExecuteNonQueryAsync();
+            try
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+            catch (MySqlException ex) when (ex.Message.Contains("Not enough seats available"))
+            {
+                throw new BusinessRuleException(ExceptionMessage.NotEnoughSeats);
+            }
 
             return new BookingLock
             {
@@ -261,11 +268,8 @@ namespace TicketBooking.Repository.Repository.Implementation
             await using MySqlConnection connection = new(ConnectionString);
             await connection.OpenAsync();
 
-            await using MySqlCommand command = new(
-                "DELETE FROM booking_locks WHERE user_id = @p_user_id AND event_id = @p_event_id",
-                connection
-            );
-            command.CommandType = CommandType.Text;
+            await using MySqlCommand command = new("delete_existing_lock", connection);
+            command.CommandType = CommandType.StoredProcedure;
             command.Parameters.AddWithValue("@p_user_id", userId);
             command.Parameters.AddWithValue("@p_event_id", eventId);
 

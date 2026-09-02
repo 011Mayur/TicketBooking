@@ -14,7 +14,6 @@ using TicketBooking.Repository;
 using TicketBooking.Repository.Repository.Implementation;
 using TicketBooking.Repository.Repository.Interface;
 using TicketBooking.Service.Appsettings;
-using TicketBooking.Service.BackgroundJobs;
 using TicketBooking.Service.Service.Implementation;
 using TicketBooking.Service.Service.Interface;
 
@@ -43,20 +42,22 @@ builder.Services.AddSwaggerGen(c =>
                 "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
         }
     );
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
         {
-            new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
+                new OpenApiSecurityScheme
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                },
+                Array.Empty<string>()
             },
-            Array.Empty<string>()
         }
-    });
+    );
 });
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
@@ -112,7 +113,8 @@ builder.Services.AddHangfire(config =>
     )
 );
 builder.Services.AddHangfireServer();
-string frontEndUrl = builder.Configuration.GetValue<string>("frontEndUrl") ?? "http://localhost:5173";
+string frontEndUrl =
+    builder.Configuration.GetValue<string>("frontEndUrl") ?? "http://localhost:5173";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -158,25 +160,8 @@ builder
             },
         };
     });
-builder.Services.AddQuartz(q =>
-{
-    var lockExpiryJobKey = new JobKey("LockExpiryJob");
-    q.AddJob<LockExpiryBackgroundJob>(opts => opts.WithIdentity(lockExpiryJobKey));
 
-    q.AddTrigger(opts =>
-        opts.ForJob(lockExpiryJobKey)
-            .WithIdentity("LockExpiryTrigger")
-            .WithSimpleSchedule(x =>
-                x.WithIntervalInMinutes(5) // Run every 5 minutes
-                    .RepeatForever()
-            )
-    );
-});
 
-builder.Services.AddQuartzHostedService(options =>
-{
-    options.WaitForJobsToComplete = true;
-});
 builder.Services.AddAuthorization();
 var app = builder.Build();
 

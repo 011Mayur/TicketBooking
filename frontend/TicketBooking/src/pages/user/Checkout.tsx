@@ -1,4 +1,7 @@
 import { useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import type { ApiErrorResponse } from "../../types";
 import {
   Box,
   Container,
@@ -125,12 +128,23 @@ const Checkout = () => {
         setCheckoutError("Checkout validation failed");
       }
     } catch (err) {
-      const errorMsg =
-        err instanceof Error
-          ? err.message
-          : "Validation failed. Please try again.";
+      let errorMsg = "Validation failed. Please try again.";
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 422) {
+          errorMsg = " Please try again in 15 minutes.";
+        } else {
+          errorMsg =
+            (err.response?.data as ApiErrorResponse)?.message ||
+            err.message ||
+            errorMsg;
+        }
+      } else if (err instanceof Error) {
+        errorMsg = err.message;
+      }
+
       console.error("Checkout error:", errorMsg);
       setCheckoutError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setValidatingCheckout(false);
     }
@@ -193,7 +207,6 @@ const Checkout = () => {
         <ArrowBackIcon fontSize="small" sx={{ mr: 0.5 }} /> Back to Event
       </Button>
 
-
       <Box
         sx={{
           display: "grid",
@@ -228,7 +241,10 @@ const Checkout = () => {
                   >
                     {event.title}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary" }}
+                  >
                     {event.venue}
                   </Typography>
                   <Typography
@@ -469,12 +485,6 @@ const Checkout = () => {
                   ₹{pricing.finalAmount.toFixed(2)}
                 </Typography>
               </Box>
-
-              {checkoutError && (
-                <Alert severity="error" sx={{ mt: 1.5 }}>
-                  {checkoutError}
-                </Alert>
-              )}
 
               <Box sx={{ flexGrow: 1 }} />
 

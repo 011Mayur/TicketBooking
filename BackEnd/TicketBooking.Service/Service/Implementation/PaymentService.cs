@@ -13,7 +13,6 @@ namespace TicketBooking.Service.Service.Implementation
     public class PaymentService(
         IBookingRepository bookingRepo,
         IBookingLockRepository bookingLockRepo,
-        IBookingService bookingService,
         IEventService eventService,
         IConfiguration config,
         ILogger<PaymentService> logger,
@@ -22,7 +21,7 @@ namespace TicketBooking.Service.Service.Implementation
     {
         private readonly IBookingRepository _bookingRepo = bookingRepo;
         private readonly IBookingLockRepository _bookingLockRepo = bookingLockRepo;
-        private readonly IBookingService _bookingService = bookingService;
+
         private readonly IEventService _eventService = eventService;
         private readonly ILogger<PaymentService> _logger = logger;
 
@@ -46,6 +45,9 @@ namespace TicketBooking.Service.Service.Implementation
         )
         {
             EventForBooking evt = await _eventService.GetEventForBooking(bookingData.EventId);
+
+            // Delete existing lock for this user so they don't block themselves
+            await _bookingLockRepo.DeleteExistingLockForUserAsync(userId, bookingData.EventId);
 
             int totalLocked = await _bookingLockRepo.GetTotalLockedQuantityAsync(
                 bookingData.EventId
@@ -116,8 +118,6 @@ namespace TicketBooking.Service.Service.Implementation
 
                 Order order = client.Order.Create(orderOptions);
                 string razorpayOrderId = order["id"].ToString();
-
-                await _bookingLockRepo.DeleteExistingLockForUserAsync(userId, bookingData.EventId);
 
                 await _bookingLockRepo.CreateBookingLockAsync(
                     eventId: bookingData.EventId,
@@ -344,28 +344,6 @@ namespace TicketBooking.Service.Service.Implementation
                     RazorpayPaymentId = null,
                 };
             }
-        }
-
-        public async Task ReleaseBookingAsync(
-            int bookingId,
-            BookingStatus status,
-            string? razorpayPaymentId,
-            int userId
-        )
-        {
-            var booking = await _bookingRepo.GetBookingByIdAsync(bookingId);
-
-            if (booking is null || booking.UserId != userId)
-                throw new ResourceNotFoundException(ExceptionMessage.BookingNotFound);
-
-            // Store payment ID if provided (for Failed status)
-            if (!string.IsNullOrEmpty(razorpayPaymentId))
-            {
-                await _bookingRepo.UpdateRazorpayPaymentIdAsync(bookingId, razorpayPaymentId);
-            }
-
-            // Update booking status
-            await _bookingRepo.UpdateBookingStatusAsync(bookingId, status);
         }
 
         private bool VerifyRazorpaySignature(string orderId, string paymentId, string signature)

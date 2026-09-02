@@ -99,24 +99,24 @@ namespace TicketBooking.WebApi.Controller
             return int.Parse(claim);
         }
 
-        [HttpPost("cancel/{id}")]
-        public async Task<IActionResult> CancelBooking(int id)
-        {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            bool released = await _bookingService.ReleaseBookingAsync(id, userId);
-            return Success(released, released ? "Booking cancelled" : "Booking already resolved");
-        }
+        // [HttpPost("cancel/{id}")]
+        // public async Task<IActionResult> CancelBooking(int id)
+        // {
+        //     int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        //     bool released = await _bookingService.ReleaseBookingAsync(id, userId);
+        //     return Success(released, released ? "Booking cancelled" : "Booking already resolved");
+        // }
 
-        [HttpPost("release/{id}")]
-        public async Task<IActionResult> ReleaseBooking(
-            int id,
-            [FromBody] ReleaseBookingRequest request
-        )
-        {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            bool released = await _bookingService.ReleaseBookingAsync(id, userId, request.Status);
-            return Success(released, $"Booking released with status: {request.Status}");
-        }
+        // [HttpPost("release/{id}")]
+        // public async Task<IActionResult> ReleaseBooking(
+        //     int id,
+        //     [FromBody] ReleaseBookingRequest request
+        // )
+        // {
+        //     int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        //     bool released = await _bookingService.ReleaseBookingAsync(id, userId, request.Status);
+        //     return Success(released, $"Booking released with status: {request.Status}");
+        // }
 
         [HttpGet("ticket-pdf/{id}")]
         public async Task<IActionResult> GetTicketPdf(int id)

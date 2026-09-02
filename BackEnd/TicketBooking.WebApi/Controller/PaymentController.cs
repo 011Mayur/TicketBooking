@@ -65,23 +65,5 @@ namespace TicketBooking.WebApi.Controller
             var result = await _paymentService.CheckPaymentAttemptAsync(orderId);
             return Success(result, "Payment check completed");
         }
-
-        [HttpPost("release")]
-        public async Task<IActionResult> ReleaseBooking([FromBody] ReleaseBookingRequest request)
-        {
-            string? userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim is null)
-                return Unauthorized();
-            int userId = int.Parse(userIdClaim);
-
-            await _paymentService.ReleaseBookingAsync(
-                request.BookingId,
-                request.Status,
-                request.RazorpayPaymentId,
-                userId
-            );
-
-            return Success("Booking released successfully");
-        }
     }
 }

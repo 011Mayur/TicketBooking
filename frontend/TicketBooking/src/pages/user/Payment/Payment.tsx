@@ -14,6 +14,8 @@ import { usePaymentSuccessRedirect } from "../../../hooks/payment/usePaymentSucc
 import { useRazorpayCheckout } from "../../../hooks/payment/useRazorPayCheckout";
 import PaymentEventHeader from "./PaymentEventHeader";
 import { APP_ROUTES } from "../../../constants/appRoutes";
+import { toast } from "react-toastify";
+import { useEffect } from "react";
 
 const Payment = () => {
   // ========================================
@@ -78,9 +80,14 @@ const Payment = () => {
     onDismiss: () => {},
   });
 
+  // Handle order creation errors (e.g., seats locked) via toast and redirect
 
-
-
+  useEffect(() => {
+    if (orderError) {
+      toast.error(orderError);
+      navigate(-1);
+    }
+  }, [orderError, navigate]);
   if (authLoading) {
     return (
       <Container maxWidth="md" sx={{ py: 3, textAlign: "center" }}>
@@ -122,18 +129,9 @@ const Payment = () => {
     );
   }
 
-  // Guard 5: Check payment order error
+  // Guard 5: Check payment order error (handled by useEffect above)
   if (orderError) {
-    return (
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        <Alert severity="error">
-          Failed to initialize payment: {orderError}
-        </Alert>
-        <Button variant="contained" onClick={() => navigate(-1)} sx={{ mt: 2 }}>
-          Go Back
-        </Button>
-      </Container>
-    );
+    return null; // The useEffect will handle the toast and redirect
   }
 
   // Guard 6: Check payment order created
