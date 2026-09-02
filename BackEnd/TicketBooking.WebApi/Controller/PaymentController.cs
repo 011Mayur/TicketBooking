@@ -65,7 +65,5 @@ namespace TicketBooking.WebApi.Controller
             var result = await _paymentService.CheckPaymentAttemptAsync(orderId);
             return Success(result, "Payment check completed");
         }
-
-   
     }
 }
