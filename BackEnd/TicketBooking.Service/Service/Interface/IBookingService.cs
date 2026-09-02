@@ -15,9 +15,7 @@ namespace TicketBooking.Service.Service.Interface
 
         Task ExpireStaleBookingsAsync();
 
-        Task<bool> ReleaseBookingAsync(int bookingId, int userId);
-
-        Task<bool> ReleaseBookingAsync(int bookingId, int userId, BookingStatus status);
+  
 
         Task<bool> ValidateAndCheckoutAsync(int userId, CreateBookingRequestDto dto);
         Task<BookingResponseDto> CreateBookingOnPaymentAsync(

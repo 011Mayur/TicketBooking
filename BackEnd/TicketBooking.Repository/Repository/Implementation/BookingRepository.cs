@@ -137,52 +137,7 @@ namespace TicketBooking.Repository.Repository.Implementation
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task HandlePaymentFailureAsync(string razorpayOrderId)
-        {
-            await using MySqlConnection connection = new(ConnectionString);
-            await connection.OpenAsync();
-
-            await using MySqlCommand command = new("handle_payment_failure", connection);
-
-            command.CommandType = CommandType.StoredProcedure;
-
-            command.Parameters.AddWithValue("@p_razorpay_order_id", razorpayOrderId);
-
-            command.Parameters.AddWithValue("@p_failure_reason", "Payment verification failed");
-
-            command.Parameters.AddWithValue("@p_updated_at", DateTime.UtcNow);
-
-            await command.ExecuteNonQueryAsync();
-        }
-
-        public async Task<bool> ReleaseBookingAsync(int bookingId)
-        {
-            using MySqlConnection connection = new(ConnectionString);
-            await connection.OpenAsync();
-
-            using MySqlCommand command = new("release_booking", connection)
-            {
-                CommandType = CommandType.StoredProcedure,
-            };
-
-            command.Parameters.Add(
-                new MySqlParameter("p_booking_id", MySqlDbType.Int32)
-                {
-                    Direction = ParameterDirection.Input,
-                    Value = bookingId,
-                }
-            );
-
-            MySqlParameter releasedParam = new("p_released", MySqlDbType.Bit)
-            {
-                Direction = ParameterDirection.Output,
-            };
-            command.Parameters.Add(releasedParam);
-
-            await command.ExecuteNonQueryAsync();
-
-            return releasedParam.Value != DBNull.Value && Convert.ToBoolean(releasedParam.Value);
-        }
+        
 
         public async Task<BookingResponseDto?> GetBookingByOrderIdAsync(string razorpayOrderId)
         {
@@ -336,41 +291,7 @@ namespace TicketBooking.Repository.Repository.Implementation
             return results;
         }
 
-        public async Task<bool> ReleaseBookingAsync(int bookingId, BookingStatus status)
-        {
-            using MySqlConnection connection = new(ConnectionString);
-            await connection.OpenAsync();
-
-            using MySqlCommand command = new("release_booking_hold", connection)
-            {
-                CommandType = CommandType.StoredProcedure,
-            };
-
-            command.Parameters.Add(
-                new MySqlParameter("p_booking_id", MySqlDbType.Int32)
-                {
-                    Direction = ParameterDirection.Input,
-                    Value = bookingId,
-                }
-            );
-            command.Parameters.Add(
-                new MySqlParameter("p_status", MySqlDbType.String)
-                {
-                    Direction = ParameterDirection.Input,
-                    Value = status.ToString(),
-                }
-            );
-
-            MySqlParameter releasedParam = new("p_released", MySqlDbType.Bit)
-            {
-                Direction = ParameterDirection.Output,
-            };
-            command.Parameters.Add(releasedParam);
-
-            await command.ExecuteNonQueryAsync();
-
-            return releasedParam.Value != DBNull.Value && Convert.ToBoolean(releasedParam.Value);
-        }
+      
 
         public async Task UpdateRazorpayPaymentIdAsync(int bookingId, string razorpayPaymentId)
         {

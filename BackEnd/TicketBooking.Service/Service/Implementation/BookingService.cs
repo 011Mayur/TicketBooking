@@ -237,34 +237,10 @@ namespace TicketBooking.Service.Service.Implementation
         {
             List<int> expiredIds = await _bookingRepo.GetExpiredPendingBookingIdsAsync();
 
-            foreach (int id in expiredIds)
-                await _bookingRepo.ReleaseBookingAsync(id);
-
-            // Also cleanup expired locks
+         
             await _bookingLockRepo.DeleteExpiredLocksAsync();
         }
 
-        public async Task<bool> ReleaseBookingAsync(int bookingId, int userId)
-        {
-            BookingResponseDto? booking = await _bookingRepo.GetBookingByIdAsync(bookingId);
-            if (booking is null || booking.UserId != userId)
-                throw new ResourceNotFoundException(
-                    ExceptionMessage.ResourceNotFound(bookingId, "Booking")
-                );
-
-            return await _bookingRepo.ReleaseBookingAsync(bookingId);
-        }
-
-        public async Task<bool> ReleaseBookingAsync(int bookingId, int userId, BookingStatus status)
-        {
-            BookingResponseDto? booking = await _bookingRepo.GetBookingByIdAsync(bookingId);
-            if (booking is null || booking.UserId != userId)
-                throw new ResourceNotFoundException(
-                    ExceptionMessage.ResourceNotFound(bookingId, "Booking")
-                );
-
-            return await _bookingRepo.ReleaseBookingAsync(bookingId, status);
-        }
 
         public async Task<byte[]> GenerateTicketPdfAsync(int bookingId, int userId)
         {

@@ -43,13 +43,11 @@ export const API_ROUTES = Object.freeze({
     CATEGORIES_ID: (id: number | string) => `/event-management/categories/${id}`,
   },
   BOOKING: {
-    CREATE: "/bookings/create-bookings",
     GET_BY_ID: (id: number | string) => `/bookings/get-booking/${id}`,
     COUPON_APPLY: "/bookings/apply-coupon",
     EVENT_COUPON: (eventId: number | string) => `/bookings/get-coupons/${eventId}`,
     EVENT_BY_ID: (eventId: number | string) => `/bookings/get-event/${eventId}`,
-    CANCEL: (bookingId: number | string) => `/bookings/cancel/${bookingId}`,
-    RELEASE: (bookingId: number | string) => `/bookings/release/${bookingId}`,
+
     MY_BOOKINGS: `/bookings/my-bookings`,
     VALIDATE_CHECKOUT: "/bookings/validate-checkout",
     TICKET_PDF: (bookingId: number | string) => `/bookings/ticket-pdf/${bookingId}`,

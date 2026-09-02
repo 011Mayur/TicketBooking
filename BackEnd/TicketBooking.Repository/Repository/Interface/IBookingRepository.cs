@@ -14,7 +14,7 @@ namespace TicketBooking.Repository.Repository.Interface
             string razorpayPaymentId,
             BookingStatus status
         );
-        Task HandlePaymentFailureAsync(string razorpayOrderId);
+
         Task<BookingResponseDto?> GetBookingByOrderIdAsync(string razorpayOrderId);
         Task RestoreSeatsAsync(int eventId, int quantity);
 
@@ -29,9 +29,6 @@ namespace TicketBooking.Repository.Repository.Interface
 
         Task<List<int>> GetExpiredPendingBookingIdsAsync();
 
-        Task<bool> ReleaseBookingAsync(int bookingId);
-
-        Task<bool> ReleaseBookingAsync(int bookingId, BookingStatus status);
 
         Task UpdateRazorpayPaymentIdAsync(int bookingId, string razorpayPaymentId);
 

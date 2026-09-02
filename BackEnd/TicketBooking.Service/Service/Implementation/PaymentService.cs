@@ -346,27 +346,7 @@ namespace TicketBooking.Service.Service.Implementation
             }
         }
 
-        public async Task ReleaseBookingAsync(
-            int bookingId,
-            BookingStatus status,
-            string? razorpayPaymentId,
-            int userId
-        )
-        {
-            var booking = await _bookingRepo.GetBookingByIdAsync(bookingId);
-
-            if (booking is null || booking.UserId != userId)
-                throw new ResourceNotFoundException(ExceptionMessage.BookingNotFound);
-
-            // Store payment ID if provided (for Failed status)
-            if (!string.IsNullOrEmpty(razorpayPaymentId))
-            {
-                await _bookingRepo.UpdateRazorpayPaymentIdAsync(bookingId, razorpayPaymentId);
-            }
-
-            // Update booking status
-            await _bookingRepo.UpdateBookingStatusAsync(bookingId, status);
-        }
+   
 
         private bool VerifyRazorpaySignature(string orderId, string paymentId, string signature)
         {
