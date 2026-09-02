@@ -51,7 +51,10 @@ namespace TicketBooking.Service.Service.Implementation
             if (eventDateTime < DateTime.UtcNow)
                 throw new BusinessRuleException(ExceptionMessage.EventEnded);
 
-            // Check available seats (considering active locks)
+            // Remove any existing lock by this user to avoid them locking themselves out
+            await _bookingLockRepo.DeleteExistingLockForUserAsync(userId, dto.EventId);
+
+            // Check available seats (considering active locks by others)
             int totalLocked = await _bookingLockRepo.GetTotalLockedQuantityAsync(dto.EventId);
             int actualAvailable = evt.AvailableSeats - totalLocked;
 
@@ -237,10 +240,8 @@ namespace TicketBooking.Service.Service.Implementation
         {
             List<int> expiredIds = await _bookingRepo.GetExpiredPendingBookingIdsAsync();
 
-         
             await _bookingLockRepo.DeleteExpiredLocksAsync();
         }
-
 
         public async Task<byte[]> GenerateTicketPdfAsync(int bookingId, int userId)
         {

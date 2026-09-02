@@ -16,7 +16,5 @@ namespace TicketBooking.Service.Service.Interface
         );
 
         Task<CheckPaymentAttemptResponse> CheckPaymentAttemptAsync(string orderId);
-
-    
     }
 }

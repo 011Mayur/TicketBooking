@@ -75,7 +75,14 @@ namespace TicketBooking.Repository.Repository.Implementation
             };
             command.Parameters.Add(newIdParam);
 
-            await command.ExecuteNonQueryAsync();
+            try
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+            catch (MySqlException ex) when (ex.Message.Contains("Not enough seats available"))
+            {
+                throw new BusinessRuleException(ExceptionMessage.NotEnoughSeats);
+            }
 
             return new BookingLock
             {
