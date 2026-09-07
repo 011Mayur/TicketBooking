@@ -122,7 +122,8 @@ const Checkout = () => {
       let errorMsg = "Validation failed. Please try again.";
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 422) {
-          errorMsg = " Please try again in 15 minutes.";
+          errorMsg =
+            "Seats are currently hold by another user try you luck after sometime";
         } else {
           errorMsg =
             (err.response?.data as ApiErrorResponse)?.message ||
@@ -135,7 +136,7 @@ const Checkout = () => {
 
       console.error("Checkout error:", errorMsg);
 
-      toast.error(errorMsg);
+      toast.warning(errorMsg);
     } finally {
       setValidatingCheckout(false);
     }
