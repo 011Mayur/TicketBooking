@@ -55,7 +55,6 @@ const Checkout = () => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [couponModalOpen, setCouponModalOpen] = useState(false);
   const [validatingCheckout, setValidatingCheckout] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // ========================================
   // PRICE & DISCOUNT CALCULATION
@@ -96,13 +95,7 @@ const Checkout = () => {
       return;
     }
 
-    if (!event) {
-      setCheckoutError("Event data not loaded");
-      return;
-    }
-
     setValidatingCheckout(true);
-    setCheckoutError(null);
 
     try {
       const isValid = await validateCheckout({
@@ -124,14 +117,13 @@ const Checkout = () => {
             },
           },
         });
-      } else {
-        setCheckoutError("Checkout validation failed");
       }
     } catch (err) {
       let errorMsg = "Validation failed. Please try again.";
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 422) {
-          errorMsg = " Please try again in 15 minutes.";
+          errorMsg =
+            "Seats are currently hold by another user try you luck after sometime";
         } else {
           errorMsg =
             (err.response?.data as ApiErrorResponse)?.message ||
@@ -143,8 +135,8 @@ const Checkout = () => {
       }
 
       console.error("Checkout error:", errorMsg);
-      setCheckoutError(errorMsg);
-      toast.error(errorMsg);
+
+      toast.warning(errorMsg);
     } finally {
       setValidatingCheckout(false);
     }

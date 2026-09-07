@@ -2,7 +2,7 @@
 export { useAuth } from "./auth";
 
 // Booking hooks
-export { useBooking, useMyBookings, useAbandonedBookingCleanup } from "./booking";
+export { useMyBookings } from "./booking";
 
 // Checkout hooks
 export { useCheckout, useCoupons } from "./checkout";
